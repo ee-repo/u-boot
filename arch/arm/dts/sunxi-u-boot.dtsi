@@ -1,9 +1,11 @@
 #include <config.h>
 
 / {
+	/* WTF do you just assume we have an mmc?
 	aliases {
 		mmc1 = &mmc2;
 	};
+	*/
 
 	binman {
 		filename = "u-boot-sunxi-with-spl.bin";
