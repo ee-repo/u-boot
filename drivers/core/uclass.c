@@ -260,7 +260,7 @@ int uclass_find_device_by_name(enum uclass_id id, const char *name,
 		return ret;
 
 	uclass_foreach_dev(dev, uc) {
-		if (!strncmp(dev->name, name, strlen(name))) {
+		if (!strcmp(dev->name, name)) {
 			*devp = dev;
 			return 0;
 		}
@@ -757,3 +757,8 @@ int uclass_pre_remove_device(struct udevice *dev)
 	return 0;
 }
 #endif
+
+UCLASS_DRIVER(nop) = {
+	.id		= UCLASS_NOP,
+	.name		= "nop",
+};

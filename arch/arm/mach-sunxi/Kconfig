@@ -161,8 +161,6 @@ config MACH_SUN4I
 	bool "sun4i (Allwinner A10)"
 	select CPU_V7A
 	select ARM_CORTEX_CPU_IS_UP
-	select DM_MMC if MMC
-	select DM_SCSI if SCSI
 	select PHY_SUN4I_USB
 	select DRAM_SUN4I
 	select SUNXI_GEN_SUN4I
@@ -172,7 +170,6 @@ config MACH_SUN5I
 	bool "sun5i (Allwinner A13)"
 	select CPU_V7A
 	select ARM_CORTEX_CPU_IS_UP
-	select DM_MMC if MMC
 	select DRAM_SUN4I
 	select PHY_SUN4I_USB
 	select SUNXI_GEN_SUN4I
@@ -185,7 +182,6 @@ config MACH_SUN6I
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
-	select DM_MMC if MMC
 	select DRAM_SUN6I
 	select PHY_SUN4I_USB
 	select SUN6I_P2WI
@@ -212,7 +208,6 @@ config MACH_SUN8I_A23
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
-	select DM_MMC if MMC
 	select DRAM_SUN8I_A23
 	select PHY_SUN4I_USB
 	select SUNXI_GEN_SUN6I
@@ -226,7 +221,6 @@ config MACH_SUN8I_A33
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
-	select DM_MMC if MMC
 	select DRAM_SUN8I_A33
 	select PHY_SUN4I_USB
 	select SUNXI_GEN_SUN6I
@@ -237,7 +231,6 @@ config MACH_SUN8I_A33
 config MACH_SUN8I_A83T
 	bool "sun8i (Allwinner A83T)"
 	select CPU_V7A
-	select DM_MMC if MMC
 	select DRAM_SUN8I_A83T
 	select PHY_SUN4I_USB
 	select SUNXI_GEN_SUN6I
@@ -253,7 +246,6 @@ config MACH_SUN8I_H3
 	select ARCH_SUPPORT_PSCI
 	select MACH_SUNXI_H3_H5
 	select ARMV7_BOOT_SEC_DEFAULT if OLD_SUNXI_KERNEL_COMPAT
-	select DM_MMC if MMC
 
 config MACH_SUN8I_R40
 	bool "sun8i (Allwinner R40)"
@@ -272,7 +264,6 @@ config MACH_SUN8I_V3S
 	select CPU_V7_HAS_NONSEC
 	select CPU_V7_HAS_VIRT
 	select ARCH_SUPPORT_PSCI
-	select DM_MMC if MMC
 	select SUNXI_GEN_SUN6I
 	select SUNXI_DRAM_DW
 	select SUNXI_DRAM_DW_16BIT
@@ -287,13 +278,11 @@ config MACH_SUN9I
 	select SUNXI_GEN_SUN6I
 	select SUN8I_RSB
 	select SUPPORT_SPL
-	select DM_MMC if MMC
 
 config MACH_SUN50I
 	bool "sun50i (Allwinner A64)"
 	select ARM64
 	select DM_I2C
-	select DM_MMC if MMC
 	select PHY_SUN4I_USB
 	select SUN6I_PRCM
 	select SUNXI_DE2
@@ -310,7 +299,6 @@ config MACH_SUN50I_H5
 	bool "sun50i (Allwinner H5)"
 	select ARM64
 	select MACH_SUNXI_H3_H5
-	select DM_MMC if MMC
 	select FIT
 	select SPL_LOAD_FIT
 
@@ -318,8 +306,8 @@ config MACH_SUN50I_H6
 	bool "sun50i (Allwinner H6)"
 	select ARM64
 	select SUPPORT_SPL
-	select DM_MMC if MMC
 	select FIT
+	select PHY_SUN4I_USB
 	select SPL_LOAD_FIT
 	select DRAM_SUN50I_H6
 
@@ -360,7 +348,7 @@ config ARM_BOOT_HOOK_RMR
 	This allows both the SPL and the U-Boot proper to be entered in
 	either mode and switch to AArch64 if needed.
 
-if SUNXI_DRAM_DW
+if SUNXI_DRAM_DW || DRAM_SUN50I_H6
 config SUNXI_DRAM_DDR3
 	bool
 
@@ -389,6 +377,22 @@ config SUNXI_DRAM_LPDDR3_STOCK
 	---help---
 	This option is the LPDDR3 timing used by the stock boot0 by
 	Allwinner.
+
+config SUNXI_DRAM_H6_LPDDR3
+	bool "LPDDR3 DRAM chips on the H6 DRAM controller"
+	select SUNXI_DRAM_LPDDR3
+	depends on DRAM_SUN50I_H6
+	---help---
+	This option is the LPDDR3 timing used by the stock boot0 by
+	Allwinner.
+
+config SUNXI_DRAM_H6_DDR3_1333
+	bool "DDR3-1333 boot0 timings on the H6 DRAM controller"
+	select SUNXI_DRAM_DDR3
+	depends on DRAM_SUN50I_H6
+	---help---
+	This option is the DDR3 timing used by the boot0 on H6 TV boxes
+	which use a DDR3-1333 timing.
 
 config SUNXI_DRAM_DDR2_V3S
 	bool "DDR2 found in V3s chip"
@@ -433,10 +437,11 @@ endif
 
 config DRAM_ZQ
 	int "sunxi dram zq value"
-	default 123 if MACH_SUN4I || MACH_SUN5I || MACH_SUN6I || MACH_SUN8I
+	default 123 if MACH_SUN4I || MACH_SUN5I || MACH_SUN6I || \
+		       MACH_SUN8I_A23 || MACH_SUN8I_A33 || MACH_SUN8I_A83T
 	default 127 if MACH_SUN7I
 	default 14779 if MACH_SUN8I_V3S
-	default 3881979 if MACH_SUN8I_R40 || MACH_SUN50I_H6
+	default 3881979 if MACH_SUNXI_H3_H5 || MACH_SUN8I_R40 || MACH_SUN50I_H6
 	default 4145117 if MACH_SUN9I
 	default 3881915 if MACH_SUN50I
 	---help---
@@ -445,6 +450,7 @@ config DRAM_ZQ
 config DRAM_ODT_EN
 	bool "sunxi dram odt enable"
 	default y if MACH_SUN8I_A23
+	default y if MACH_SUNXI_H3_H5
 	default y if MACH_SUN8I_R40
 	default y if MACH_SUN50I
 	default y if MACH_SUN50I_H6
@@ -557,6 +563,14 @@ config SYS_BOARD
 
 config SYS_SOC
 	default "sunxi"
+
+config CONS_INDEX
+        int "UART used for console"
+        range 1 5
+        default 1
+        ---help---
+        Defines the UART port used for serial output. It starts at 1 so UART0 is 1,
+        UART1 is 2 and so on.
 
 config UART0_PORT_F
 	bool "UART0 on MicroSD breakout board"
@@ -895,6 +909,14 @@ config VIDEO_LCD_PANEL_I2C_SCL
 	Set the SCL pin for the LCD i2c interface. This takes a string in the
 	format understood by sunxi_name_to_gpio, e.g. PH1 for pin 1 of port H.
 
+choice
+	prompt "Sunxi Board Variant"
+	optional
+
+config SUNXI_PANGOLIN
+	bool "Theobroma A31 uQ7 Board"
+
+endchoice
 
 # Note only one of these may be selected at a time! But hidden choices are
 # not supported by Kconfig
@@ -993,12 +1015,57 @@ config SPL_STACK_R_ADDR
 	default 0x4fe00000 if MACH_SUN50I_H6
 
 config SPL_SPI_SUNXI
-	bool "Support for SPI Flash on Allwinner SoCs in SPL"
+	bool "Support for SPI (NOR) Flash on Allwinner SoCs in SPL"
 	depends on MACH_SUNIV || MACH_SUN4I || MACH_SUN5I || MACH_SUN7I || MACH_SUNXI_H3_H5 || MACH_SUN50I
 	help
-	  Enable support for SPI Flash. This option allows SPL to read from
-	  sunxi SPI Flash. It uses the same method as the boot ROM, so does
+	  Enable support for SPI-NOR Flash. This option allows SPL to read from
+	  sunxi SPI-NOR Flash. It uses the same method as the boot ROM, so does
 	  not need any extra configuration.
+
+config SPL_SPINAND_SUNXI
+	bool "Support for SPI NAND-Flash on Allwinner SoCs in SPL"
+	depends on MACH_SUN4I || MACH_SUN5I || MACH_SUN7I || MACH_SUNXI_H3_H5 || MACH_SUN50I || MACH_SUN8I_V3S
+	select SPL_SPINAND_SUNXI_SPL_SIZE
+	select SPL_SPINAND_SUNXI_UBOOT_PADDING
+	select SPL_SPINAND_SUNXI_PAGESIZE
+	help
+	  Enable support for SPI-NAND Flash. This option allows SPL to read from
+	  sunxi SPI-NAND Flash. It needs further configuration to calculate all offsets correctly.
+
+config SPL_SPINAND_SUNXI_SPL_SIZE
+	int "Expected SPL size after padding to blocksize"
+	depends on SPL_SPINAND_SUNXI
+	default 0x6000
+	help
+	  The sunxi BROM is only able to load 1KB per page when booting from spi-nand.
+	  Thus the SPL is getting chunked to 1KB pages in spi-nand. To correctly calculate
+	  the address of u-boot it is thus neccessary to know the size of the SPL in 
+	  spi-nand.
+
+config SPL_SPINAND_SUNXI_UBOOT_PADDING
+	int "Offset between SPL and u-boot"
+	depends on SPL_SPINAND_SUNXI
+	default 0x2000
+	help
+	  u-boot is placed with an offset between SPL. To correctly calculate
+	  the address of u-boot it is thus neccessary to know the offset. 
+
+config SPL_SPINAND_SUNXI_PAGESIZE
+	int "NAND pagesize in KB"
+	depends on SPL_SPINAND_SUNXI
+	default 2048
+	help
+	  The sunxi BROM is only able to load 1KB per page when booting from spi-nand.
+	  Thus the SPL is getting chunked to 1KB pages in spi-nand. To correctly calculate
+	  the address of u-boot it is thus neccessary to know the page size of the spi-nand. 
+
+config SPL_SPINAND_SUNXI_SPL_USE_GENERIC2K_ON_UNKNOWN
+	bool "Generic SPI-NAND config with 2K page-size"
+	depends on SPL_SPINAND_SUNXI
+	default n
+	help
+	  If no known spi-nand is found, try with generic settings for spi-nand with a
+	  page-size of 2K.
 
 config PINE64_DT_SELECTION
 	bool "Enable Pine64 device tree selection code"

@@ -143,15 +143,15 @@
 };
 
 &spi0 {
-    pinctrl-0 = <&spi0_pins>;
-    pinctrl-names = "default";
-    status = "okay";
-    spi_nand: spi-nand@0 {
-				#address-cells = <1>;
-				#size-cells = <1>;
-				compatible = "spi-nand";
-				reg = <0>;
-				spi-max-frequency = <50000000>;
+	/* Disable SPI NOR by default: it optional on Orange Pi Zero boards */
+	status = "disabled";
+
+	flash@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "mxicy,mx25l1606e", "winbond,w25q128";
+		reg = <0>;
+		spi-max-frequency = <40000000>;
 	};
 };
 

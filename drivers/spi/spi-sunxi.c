@@ -324,8 +324,12 @@ static int sun4i_spi_claim_bus(struct udevice *dev)
 	setbits_le32(SPI_REG(priv, SPI_TCR), SPI_BIT(priv, SPI_TCR_CS_MANUAL) |
 		     SPI_BIT(priv, SPI_TCR_CS_ACTIVE_LOW));
 
-	sun4i_spi_set_speed(bus, priv->freq);
+
+/* TODO: <CHECK> !! below two line breaks H3 SPINAND !! why need?? */
+#if defined CONFIG_MACH_SUNIV
+  sun4i_spi_set_speed(bus, priv->freq);
 	sun4i_spi_set_mode(bus, priv->mode);
+#endif
 
 	return 0;
 }
