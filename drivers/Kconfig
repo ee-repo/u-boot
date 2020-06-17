@@ -90,6 +90,8 @@ source "drivers/remoteproc/Kconfig"
 
 source "drivers/reset/Kconfig"
 
+source "drivers/rng/Kconfig"
+
 source "drivers/rtc/Kconfig"
 
 source "drivers/scsi/Kconfig"
@@ -117,6 +119,8 @@ source "drivers/timer/Kconfig"
 source "drivers/tpm/Kconfig"
 
 source "drivers/usb/Kconfig"
+
+source "drivers/ufs/Kconfig"
 
 source "drivers/video/Kconfig"
 

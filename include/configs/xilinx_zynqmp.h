@@ -94,7 +94,6 @@
 /* Console I/O Buffer Size */
 #define CONFIG_SYS_CBSIZE		2048
 #define CONFIG_SYS_BARGSIZE		CONFIG_SYS_CBSIZE
-#define CONFIG_PANIC_HANG
 #define CONFIG_SYS_MAXARGS		64
 
 /* Ethernet driver */
@@ -109,13 +108,11 @@
 
 #define ENV_MEM_LAYOUT_SETTINGS \
 	"fdt_high=10000000\0" \
-	"initrd_high=10000000\0" \
 	"fdt_addr_r=0x40000000\0" \
 	"pxefile_addr_r=0x10000000\0" \
 	"kernel_addr_r=0x18000000\0" \
-	"scriptaddr=0x02000000\0" \
+	"scriptaddr=0x20000000\0" \
 	"ramdisk_addr_r=0x02100000\0" \
-	"script_offset_f=0x3e80000\0" \
 	"script_size_f=0x80000\0" \
 
 #if defined(CONFIG_MMC_SDHCI_ZYNQ)
@@ -176,7 +173,16 @@
 #define BOOTENV_DEV_NAME_NAND(devtypeu, devtypel, instance) \
 	#devtypel #instance " "
 
+#define BOOT_TARGET_DEVICES_JTAG(func)	func(JTAG, jtag, na)
+
+#define BOOTENV_DEV_JTAG(devtypeu, devtypel, instance) \
+	"bootcmd_jtag=source $scriptaddr; echo SCRIPT FAILED: continuing...;\0"
+
+#define BOOTENV_DEV_NAME_JTAG(devtypeu, devtypel, instance) \
+	"jtag "
+
 #define BOOT_TARGET_DEVICES(func) \
+	BOOT_TARGET_DEVICES_JTAG(func) \
 	BOOT_TARGET_DEVICES_MMC(func) \
 	BOOT_TARGET_DEVICES_QSPI(func) \
 	BOOT_TARGET_DEVICES_NAND(func) \
@@ -235,7 +241,11 @@
 # define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR	0 /* unused */
 # define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTORS	0 /* unused */
 # define CONFIG_SYS_MMCSD_RAW_MODE_KERNEL_SECTOR	0 /* unused */
-# define CONFIG_SPL_FS_LOAD_PAYLOAD_NAME	"u-boot.img"
+# if defined(CONFIG_SPL_LOAD_FIT)
+#  define CONFIG_SPL_FS_LOAD_PAYLOAD_NAME	"u-boot.itb"
+# else
+#  define CONFIG_SPL_FS_LOAD_PAYLOAD_NAME	"u-boot.img"
+# endif
 #endif
 
 #if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_DFU)

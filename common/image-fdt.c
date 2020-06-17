@@ -14,9 +14,11 @@
 #include <env.h>
 #include <errno.h>
 #include <image.h>
+#include <malloc.h>
 #include <linux/libfdt.h>
 #include <mapmem.h>
 #include <asm/io.h>
+#include <tee/optee.h>
 
 #ifndef CONFIG_SYS_FDT_PAD
 #define CONFIG_SYS_FDT_PAD 0x3000
@@ -121,7 +123,7 @@ void boot_fdt_add_mem_rsv_regions(struct lmb *lmb, void *fdt_blob)
 			/* check if this subnode has a reg property */
 			ret = fdt_get_resource(fdt_blob, subnode, "reg", 0,
 					       &res);
-			if (!ret) {
+			if (!ret && fdtdec_get_is_enabled(fdt_blob, subnode)) {
 				addr = res.start;
 				size = res.end - res.start + 1;
 				boot_fdt_reserve_region(lmb, addr, size);
@@ -284,7 +286,8 @@ int boot_get_fdt(int flag, int argc, char * const argv[], uint8_t arch,
 	*of_flat_tree = NULL;
 	*of_size = 0;
 
-	img_addr = (argc == 0) ? load_addr : simple_strtoul(argv[0], NULL, 16);
+	img_addr = (argc == 0) ? image_load_addr :
+			simple_strtoul(argv[0], NULL, 16);
 	buf = map_sysmem(img_addr, 0);
 
 	if (argc > 2)
@@ -303,7 +306,7 @@ int boot_get_fdt(int flag, int argc, char * const argv[], uint8_t arch,
 			else if (images->fit_uname_os)
 				default_addr = (ulong)images->fit_hdr_os;
 			else
-				default_addr = load_addr;
+				default_addr = image_load_addr;
 
 			if (fit_parse_conf(select, default_addr,
 					   &fdt_addr, &fit_uname_config)) {
@@ -559,6 +562,13 @@ int image_setup_libfdt(bootm_headers_t *images, void *blob,
 			       fdt_strerror(fdt_ret));
 			goto err;
 		}
+	}
+
+	fdt_ret = optee_copy_fdt_nodes(gd->fdt_blob, blob);
+	if (fdt_ret) {
+		printf("ERROR: transfer of optee nodes to new fdt failed: %s\n",
+		       fdt_strerror(fdt_ret));
+		goto err;
 	}
 
 	/* Delete the old LMB reservation */

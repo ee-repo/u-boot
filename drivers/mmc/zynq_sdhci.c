@@ -10,6 +10,8 @@
 #include <dm.h>
 #include <fdtdec.h>
 #include "mmc_private.h"
+#include <dm/device_compat.h>
+#include <linux/err.h>
 #include <linux/libfdt.h>
 #include <malloc.h>
 #include <sdhci.h>
@@ -35,7 +37,6 @@ struct arasan_sdhci_priv {
 
 static const u8 mode2timing[] = {
 	[MMC_LEGACY] = UHS_SDR12_BUS_SPEED,
-	[SD_LEGACY] = UHS_SDR12_BUS_SPEED,
 	[MMC_HS] = HIGH_SPEED_BUS_SPEED,
 	[SD_HS] = HIGH_SPEED_BUS_SPEED,
 	[MMC_HS_52] = HIGH_SPEED_BUS_SPEED,
@@ -190,7 +191,7 @@ static void arasan_sdhci_set_control_reg(struct sdhci_host *host)
 }
 #endif
 
-#if defined(CONFIG_DM_MMC) && defined(CONFIG_ARCH_ZYNQMP)
+#if defined(CONFIG_ARCH_ZYNQMP)
 const struct sdhci_ops arasan_ops = {
 	.platform_execute_tuning	= &arasan_sdhci_execute_tuning,
 	.set_delay = &arasan_sdhci_set_tapdelay,
@@ -266,7 +267,7 @@ static int arasan_sdhci_ofdata_to_platdata(struct udevice *dev)
 
 	priv->host->name = dev->name;
 
-#if defined(CONFIG_DM_MMC) && defined(CONFIG_ARCH_ZYNQMP)
+#if defined(CONFIG_ARCH_ZYNQMP)
 	priv->host->ops = &arasan_ops;
 #endif
 

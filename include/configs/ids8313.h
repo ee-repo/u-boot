@@ -14,8 +14,6 @@
 /*
  * High Level Configuration Options
  */
-#define CONFIG_FSL_ELBC
-
 #define CONFIG_BOOT_RETRY_TIME		900
 #define CONFIG_BOOT_RETRY_MIN		30
 #define CONFIG_RESET_TO_RETRY
@@ -223,11 +221,6 @@
 /*
  * Environment Configuration
  */
-#define CONFIG_ENV_ADDR		(CONFIG_SYS_MONITOR_BASE \
-				+ CONFIG_SYS_MONITOR_LEN)
-#define CONFIG_ENV_SIZE		0x20000
-#define CONFIG_ENV_ADDR_REDUND	(CONFIG_ENV_ADDR + CONFIG_ENV_SIZE)
-#define CONFIG_ENV_SIZE_REDUND	(CONFIG_ENV_SIZE)
 
 #define CONFIG_NETDEV			eth1
 #define CONFIG_HOSTNAME		"ids8313"

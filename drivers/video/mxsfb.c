@@ -7,6 +7,7 @@
 #include <common.h>
 #include <dm.h>
 #include <env.h>
+#include <dm/device_compat.h>
 #include <linux/errno.h>
 #include <malloc.h>
 #include <video.h>
@@ -367,6 +368,7 @@ static int mxs_video_probe(struct udevice *dev)
 	mmu_set_region_dcache_behaviour(fb_start, fb_end - fb_start,
 					DCACHE_WRITEBACK);
 	video_set_flush_dcache(dev, true);
+	gd->fb_base = plat->base;
 
 	return ret;
 }
@@ -428,6 +430,6 @@ U_BOOT_DRIVER(mxs_video) = {
 	.bind	= mxs_video_bind,
 	.probe	= mxs_video_probe,
 	.remove = mxs_video_remove,
-	.flags	= DM_FLAG_PRE_RELOC,
+	.flags	= DM_FLAG_PRE_RELOC | DM_FLAG_OS_PREPARE,
 };
 #endif /* ifndef CONFIG_DM_VIDEO */

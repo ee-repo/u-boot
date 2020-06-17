@@ -30,6 +30,8 @@
 #define SPI_RX_SLOW	BIT(11)			/* receive with 1 wire slow */
 #define SPI_RX_DUAL	BIT(12)			/* receive with 2 wires */
 #define SPI_RX_QUAD	BIT(13)			/* receive with 4 wires */
+#define SPI_TX_OCTAL	BIT(14)			/* transmit with 8 wires */
+#define SPI_RX_OCTAL	BIT(15)			/* receive with 8 wires */
 
 /* Header byte that marks the start of the message */
 #define SPI_PREAMBLE_END_BYTE	0xec
@@ -224,7 +226,7 @@ void spi_release_bus(struct spi_slave *slave);
 int spi_set_wordlen(struct spi_slave *slave, unsigned int wordlen);
 
 /**
- * SPI transfer
+ * SPI transfer (optional if mem_ops is used)
  *
  * This writes "bitlen" bits out the SPI MOSI port and simultaneously clocks
  * "bitlen" bits in the SPI MISO port.  That's just the way SPI works.
@@ -458,10 +460,23 @@ struct dm_spi_ops {
 	 * @cs:		The chip select (0..n-1)
 	 * @info:	Returns information about the chip select, if valid.
 	 *		On entry info->dev is NULL
-	 * @return 0 if OK (and @info is set up), -ENODEV if the chip select
+	 * @return 0 if OK (and @info is set up), -EINVAL if the chip select
 	 *	   is invalid, other -ve value on error
 	 */
 	int (*cs_info)(struct udevice *bus, uint cs, struct spi_cs_info *info);
+
+	/**
+	 * get_mmap() - Get memory-mapped SPI
+	 *
+	 * @dev:	The SPI flash slave device
+	 * @map_basep:	Returns base memory address for mapped SPI
+	 * @map_sizep:	Returns size of mapped SPI
+	 * @offsetp:	Returns start offset of SPI flash where the map works
+	 *	correctly (offsets before this are not visible)
+	 * @return 0 if OK, -EFAULT if memory mapping is not available
+	 */
+	int (*get_mmap)(struct udevice *dev, ulong *map_basep,
+			uint *map_sizep, uint *offsetp);
 };
 
 struct dm_spi_emul_ops {
@@ -548,7 +563,8 @@ int spi_chip_select(struct udevice *slave);
  * @bus:	SPI bus to search
  * @cs:		Chip select to look for
  * @devp:	Returns the slave device if found
- * @return 0 if found, -ENODEV on error
+ * @return 0 if found, -EINVAL if cs is invalid, -ENODEV if no device attached,
+ *	   other -ve value on error
  */
 int spi_find_chip_select(struct udevice *bus, int cs, struct udevice **devp);
 
@@ -649,6 +665,20 @@ void dm_spi_release_bus(struct udevice *dev);
  */
 int dm_spi_xfer(struct udevice *dev, unsigned int bitlen,
 		const void *dout, void *din, unsigned long flags);
+
+/**
+ * spi_get_mmap() - Get memory-mapped SPI
+ *
+ * @dev:	SPI slave device to check
+ * @map_basep:	Returns base memory address for mapped SPI
+ * @map_sizep:	Returns size of mapped SPI
+ * @offsetp:	Returns start offset of SPI flash where the map works
+ *	correctly (offsets before this are not visible)
+ * @return 0 if OK, -ENOSYS if no operation, -EFAULT if memory mapping is not
+ *	available
+ */
+int dm_spi_get_mmap(struct udevice *dev, ulong *map_basep, uint *map_sizep,
+		    uint *offsetp);
 
 /* Access the operations for a SPI device */
 #define spi_get_ops(dev)	((struct dm_spi_ops *)(dev)->driver->ops)

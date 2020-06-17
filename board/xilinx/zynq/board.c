@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <init.h>
 #include <dm/uclass.h>
 #include <env.h>
 #include <fdtdec.h>
@@ -18,13 +19,6 @@
 #include <asm/arch/sys_proto.h>
 
 DECLARE_GLOBAL_DATA_PTR;
-
-#if !defined(CONFIG_SPL_BUILD) && defined(CONFIG_BOARD_EARLY_INIT_F)
-int board_early_init_f(void)
-{
-	return 0;
-}
-#endif
 
 int board_init(void)
 {
@@ -52,11 +46,11 @@ int board_late_init(void)
 		env_set("modeboot", "norboot");
 		break;
 	case ZYNQ_BM_SD:
-		mode = "mmc";
+		mode = "mmc0";
 		env_set("modeboot", "sdboot");
 		break;
 	case ZYNQ_BM_JTAG:
-		mode = "pxe dhcp";
+		mode = "jtag pxe dhcp";
 		env_set("modeboot", "jtagboot");
 		break;
 	default:
@@ -81,6 +75,8 @@ int board_late_init(void)
 		env_targets ? env_targets : "");
 
 	env_set("boot_targets", new_targets);
+
+	env_set_hex("script_offset_f", CONFIG_BOOT_SCRIPT_OFFSET);
 
 	return 0;
 }

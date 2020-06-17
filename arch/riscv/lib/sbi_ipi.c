@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <asm/encoding.h>
 #include <asm/sbi.h>
 
 int riscv_send_ipi(int hart)
@@ -19,7 +20,18 @@ int riscv_send_ipi(int hart)
 
 int riscv_clear_ipi(int hart)
 {
-	sbi_clear_ipi();
+	csr_clear(CSR_SIP, SIP_SSIP);
+
+	return 0;
+}
+
+int riscv_get_ipi(int hart, int *pending)
+{
+	/*
+	 * The SBI does not support reading the IPI status. We always return 0
+	 * to indicate that no IPI is pending.
+	 */
+	*pending = 0;
 
 	return 0;
 }

@@ -269,7 +269,7 @@ For example:
     };
 
     U_BOOT_DRIVER(mmc_drv) = {
-            .name           = "mmc",
+            .name           = "vendor_mmc",  /* matches compatible string */
             .id             = UCLASS_MMC,
             .of_match       = mmc_ids,
             .ofdata_to_platdata = mmc_ofdata_to_platdata,
@@ -278,6 +278,12 @@ For example:
             .platdata_auto_alloc_size = sizeof(struct mmc_platdata),
     };
 
+
+Note that struct mmc_platdata is defined in the C file, not in a header. This
+is to avoid needing to include dt-structs.h in a header file. The idea is to
+keep the use of each of-platdata struct to the smallest possible code area.
+There is just one driver C file for each struct, that can convert from the
+of-platdata struct to the standard one used by the driver.
 
 In the case where SPL_OF_PLATDATA is enabled, platdata_auto_alloc_size is
 still used to allocate space for the platform data. This is different from

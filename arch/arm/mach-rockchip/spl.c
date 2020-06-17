@@ -6,17 +6,20 @@
 #include <common.h>
 #include <debug_uart.h>
 #include <dm.h>
+#include <hang.h>
 #include <ram.h>
 #include <spl.h>
 #include <asm/arch-rockchip/bootrom.h>
-#include <asm/arch-rockchip/sdram.h>
 #include <asm/io.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
-void board_return_to_bootrom(void)
+int board_return_to_bootrom(struct spl_image_info *spl_image,
+			    struct spl_boot_device *bootdev)
 {
 	back_to_bootrom(BROM_BOOT_NEXTSTAGE);
+
+	return 0;
 }
 
 __weak const char * const boot_devices[BROM_LAST_BOOTSOURCE + 1] = {
@@ -100,7 +103,7 @@ __weak int arch_cpu_init(void)
 void board_init_f(ulong dummy)
 {
 	int ret;
-#if !defined(CONFIG_SUPPORT_TPL) || defined(CONFIG_SPL_OS_BOOT)
+#if !defined(CONFIG_TPL) || defined(CONFIG_SPL_OS_BOOT)
 	struct udevice *dev;
 #endif
 
@@ -125,14 +128,6 @@ void board_init_f(ulong dummy)
 		hang();
 	}
 	arch_cpu_init();
-#if !defined(CONFIG_SUPPORT_TPL) || defined(CONFIG_SPL_OS_BOOT)
-	debug("\nspl:init dram\n");
-	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
-	if (ret) {
-		printf("DRAM init failed: %d\n", ret);
-		return;
-	}
-#endif
 #if !defined(CONFIG_ROCKCHIP_RK3188)
 	rockchip_stimer_init();
 #endif
@@ -140,11 +135,19 @@ void board_init_f(ulong dummy)
 	/* Init ARM arch timer in arch/arm/cpu/armv7/arch_timer.c */
 	timer_init();
 #endif
+#if !defined(CONFIG_TPL) || defined(CONFIG_SPL_OS_BOOT)
+	debug("\nspl:init dram\n");
+	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
+	if (ret) {
+		printf("DRAM init failed: %d\n", ret);
+		return;
+	}
+#endif
 	preloader_console_init();
 }
 
 #ifdef CONFIG_SPL_LOAD_FIT
-int board_fit_config_name_match(const char *name)
+int __weak board_fit_config_name_match(const char *name)
 {
 	/* Just empty function now - can't decide what to choose */
 	debug("%s: %s\n", __func__, name);

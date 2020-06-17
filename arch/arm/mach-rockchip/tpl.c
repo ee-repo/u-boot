@@ -6,6 +6,7 @@
 #include <common.h>
 #include <debug_uart.h>
 #include <dm.h>
+#include <hang.h>
 #include <ram.h>
 #include <spl.h>
 #include <version.h>
@@ -39,10 +40,17 @@ __weak void rockchip_stimer_init(void)
 	       TIMER_CONTROL_REG);
 }
 
+__weak int board_early_init_f(void)
+{
+	return 0;
+}
+
 void board_init_f(ulong dummy)
 {
 	struct udevice *dev;
 	int ret;
+
+	board_early_init_f();
 
 #if defined(CONFIG_DEBUG_UART) && defined(CONFIG_TPL_SERIAL_SUPPORT)
 	/*
@@ -77,9 +85,12 @@ void board_init_f(ulong dummy)
 	}
 }
 
-void board_return_to_bootrom(void)
+int board_return_to_bootrom(struct spl_image_info *spl_image,
+			    struct spl_boot_device *bootdev)
 {
 	back_to_bootrom(BROM_BOOT_NEXTSTAGE);
+
+	return 0;
 }
 
 u32 spl_boot_device(void)

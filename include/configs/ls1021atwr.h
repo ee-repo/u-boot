@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright 2014 Freescale Semiconductor, Inc.
+ * Copyright 2019 NXP
  */
 
 #ifndef __CONFIG_H
@@ -66,13 +67,13 @@
 	board/freescale/ls1021atwr/ls102xa_rcw_sd_ifc.cfg
 #endif
 
-#ifdef CONFIG_SECURE_BOOT
+#ifdef CONFIG_NXP_ESBC
 /*
  * HDR would be appended at end of image and copied to DDR along
  * with U-Boot image.
  */
 #define CONFIG_U_BOOT_HDR_SIZE				(16 << 10)
-#endif /* ifdef CONFIG_SECURE_BOOT */
+#endif /* ifdef CONFIG_NXP_ESBC */
 
 #define CONFIG_SPL_MAX_SIZE		0x1a000
 #define CONFIG_SPL_STACK		0x1001d000
@@ -209,7 +210,12 @@
 /*
  * I2C
  */
+#ifndef CONFIG_DM_I2C
 #define CONFIG_SYS_I2C
+#else
+#define CONFIG_I2C_SET_DEFAULT_BUS_NUM
+#define CONFIG_I2C_DEFAULT_BUS_NUMBER 0
+#endif
 #define CONFIG_SYS_I2C_MXC
 #define CONFIG_SYS_I2C_MXC_I2C1		/* enable I2C bus 1 */
 #define CONFIG_SYS_I2C_MXC_I2C2		/* enable I2C bus 2 */
@@ -291,9 +297,8 @@
 
 #ifdef CONFIG_LPUART
 #define CONFIG_EXTRA_ENV_SETTINGS       \
-	"bootargs=root=/dev/ram0 rw console=ttyLP0,115200\0" \
+	"bootargs=root=/dev/ram0 rw console=ttyLP0,115200 $othbootargs\0" \
 	"initrd_high=0xffffffff\0"      \
-	"fdt_high=0xffffffff\0"		\
 	"fdt_addr=0x64f00000\0"		\
 	"kernel_addr=0x65000000\0"	\
 	"scriptaddr=0x80000000\0"	\
@@ -307,6 +312,7 @@
 	"kernel_size=0x2800000\0"	\
 	"kernel_addr_sd=0x8000\0"	\
 	"kernel_size_sd=0x14000\0"	\
+	"othbootargs=cma=64M@0x0-0xb0000000\0"	\
 	BOOTENV				\
 	"boot_scripts=ls1021atwr_boot.scr\0"	\
 	"boot_script_hdr=hdr_ls1021atwr_bs.out\0"	\
@@ -347,9 +353,8 @@
 		"$kernel_size && bootm $load_addr#$board\0"
 #else
 #define CONFIG_EXTRA_ENV_SETTINGS	\
-	"bootargs=root=/dev/ram0 rw console=ttyS0,115200\0" \
+	"bootargs=root=/dev/ram0 rw console=ttyS0,115200 $othbootargs\0" \
 	"initrd_high=0xffffffff\0"      \
-	"fdt_high=0xffffffff\0"		\
 	"fdt_addr=0x64f00000\0"		\
 	"kernel_addr=0x61000000\0"	\
 	"kernelheader_addr=0x60800000\0"	\
@@ -367,6 +372,7 @@
 	"kernel_size_sd=0x14000\0"	\
 	"kernelhdr_addr_sd=0x4000\0"		\
 	"kernelhdr_size_sd=0x10\0"		\
+	"othbootargs=cma=64M@0x0-0xb0000000\0"	\
 	BOOTENV				\
 	"boot_scripts=ls1021atwr_boot.scr\0"	\
 	"boot_script_hdr=hdr_ls1021atwr_bs.out\0"	\
@@ -431,6 +437,7 @@
 /*
  * Miscellaneous configurable options
  */
+#define CONFIG_SYS_BOOTMAPSZ		(256 << 20)
 
 #define CONFIG_SYS_MEMTEST_START	0x80000000
 #define CONFIG_SYS_MEMTEST_END		0x9fffffff
@@ -446,6 +453,7 @@
 
 #ifdef CONFIG_SPL_BUILD
 #define CONFIG_SYS_MONITOR_BASE CONFIG_SPL_TEXT_BASE
+#undef CONFIG_DM_I2C
 #else
 #define CONFIG_SYS_MONITOR_BASE CONFIG_SYS_TEXT_BASE    /* start of monitor */
 #endif
@@ -458,17 +466,7 @@
 #define CONFIG_ENV_OVERWRITE
 
 #if defined(CONFIG_SD_BOOT)
-#define CONFIG_ENV_OFFSET		0x300000
 #define CONFIG_SYS_MMC_ENV_DEV		0
-#define CONFIG_ENV_SIZE			0x20000
-#elif defined(CONFIG_QSPI_BOOT)
-#define CONFIG_ENV_SIZE			0x2000
-#define CONFIG_ENV_OFFSET		0x300000
-#define CONFIG_ENV_SECT_SIZE		0x10000
-#else
-#define CONFIG_ENV_ADDR			(CONFIG_SYS_FLASH_BASE + 0x300000)
-#define CONFIG_ENV_SIZE			0x20000
-#define CONFIG_ENV_SECT_SIZE		0x20000 /* 128K (one sector) */
 #endif
 
 #include <asm/fsl_secure_boot.h>

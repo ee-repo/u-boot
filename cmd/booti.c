@@ -8,6 +8,7 @@
 #include <bootm.h>
 #include <command.h>
 #include <image.h>
+#include <irq_func.h>
 #include <lmb.h>
 #include <mapmem.h>
 #include <linux/kernel.h>
@@ -29,9 +30,9 @@ static int booti_start(cmd_tbl_t *cmdtp, int flag, int argc,
 
 	/* Setup Linux kernel Image entry point */
 	if (!argc) {
-		ld = load_addr;
+		ld = image_load_addr;
 		debug("*  kernel: default image load address = 0x%08lx\n",
-				load_addr);
+				image_load_addr);
 	} else {
 		ld = simple_strtoul(argv[0], NULL, 16);
 		debug("*  kernel: cmdline image address = 0x%08lx\n", ld);
@@ -48,6 +49,9 @@ static int booti_start(cmd_tbl_t *cmdtp, int flag, int argc,
 	}
 
 	images->ep = relocated_addr;
+	images->os.start = relocated_addr;
+	images->os.end = relocated_addr + image_size;
+
 	lmb_reserve(&images->lmb, images->ep, le32_to_cpu(image_size));
 
 	/*

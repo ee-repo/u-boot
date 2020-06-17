@@ -12,3 +12,9 @@ obj-$(CONFIG_IMX8QM) += clk-imx8qm.o
 endif
 obj-$(CONFIG_$(SPL_TPL_)CLK_IMX8MM) += clk-imx8mm.o clk-pll14xx.o \
 				clk-composite-8m.o
+obj-$(CONFIG_$(SPL_TPL_)CLK_IMX8MN) += clk-imx8mn.o clk-pll14xx.o \
+				clk-composite-8m.o
+obj-$(CONFIG_$(SPL_TPL_)CLK_IMX8MP) += clk-imx8mp.o clk-pll14xx.o \
+				clk-composite-8m.o
+
+obj-$(CONFIG_$(SPL_TPL_)CLK_IMXRT1050) += clk-imxrt1050.o

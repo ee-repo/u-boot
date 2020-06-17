@@ -10,13 +10,22 @@
 #define _PHY_H
 
 #include <dm.h>
+#include <linux/errno.h>
 #include <linux/list.h>
 #include <linux/mii.h>
 #include <linux/ethtool.h>
 #include <linux/mdio.h>
+#include <log.h>
 #include <phy_interface.h>
 
 #define PHY_FIXED_ID		0xa5a55a5a
+#define PHY_NCSI_ID            0xbeefcafe
+
+/*
+ * There is no actual id for this.
+ * This is just a dummy id for gmii2rgmmi converter.
+ */
+#define PHY_GMII2RGMII_ID	0x5a5a5a5a
 
 #define PHY_MAX_ADDR 32
 
@@ -110,6 +119,9 @@ struct phy_driver {
 			 u16 val);
 
 	struct list_head list;
+
+	/* driver private data */
+	ulong data;
 };
 
 struct phy_device {
@@ -162,6 +174,11 @@ static inline int phy_read(struct phy_device *phydev, int devad, int regnum)
 {
 	struct mii_dev *bus = phydev->bus;
 
+	if (!bus || !bus->read) {
+		debug("%s: No bus configured\n", __func__);
+		return -1;
+	}
+
 	return bus->read(bus, phydev->addr, devad, regnum);
 }
 
@@ -169,6 +186,11 @@ static inline int phy_write(struct phy_device *phydev, int devad, int regnum,
 			u16 val)
 {
 	struct mii_dev *bus = phydev->bus;
+
+	if (!bus || !bus->read) {
+		debug("%s: No bus configured\n", __func__);
+		return -1;
+	}
 
 	return bus->write(bus, phydev->addr, devad, regnum, val);
 }
@@ -238,10 +260,15 @@ static inline int phy_write_mmd(struct phy_device *phydev, int devad,
 #ifdef CONFIG_PHYLIB_10G
 extern struct phy_driver gen10g_driver;
 
-/* For now, XGMII is the only 10G interface */
+/*
+ * List all 10G interfaces here, the assumption being that PHYs on these
+ * interfaces are C45
+ */
 static inline int is_10g_interface(phy_interface_t interface)
 {
-	return interface == PHY_INTERFACE_MODE_XGMII;
+	return interface == PHY_INTERFACE_MODE_XGMII ||
+	       interface == PHY_INTERFACE_MODE_USXGMII ||
+	       interface == PHY_INTERFACE_MODE_XFI;
 }
 
 #endif
@@ -391,6 +418,8 @@ int phy_vitesse_init(void);
 int phy_xilinx_init(void);
 int phy_mscc_init(void);
 int phy_fixed_init(void);
+int phy_ncsi_init(void);
+int phy_xilinx_gmii2rgmii_init(void);
 
 int board_phy_config(struct phy_device *phydev);
 int get_phy_id(struct mii_dev *bus, int addr, int devad, u32 *phy_id);

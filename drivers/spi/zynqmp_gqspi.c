@@ -6,8 +6,7 @@
  */
 
 #include <common.h>
-#include <asm/arch/clk.h>
-#include <asm/arch/hardware.h>
+#include <cpu_func.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/io.h>
 #include <clk.h>
@@ -17,6 +16,8 @@
 #include <spi.h>
 #include <ubi_uboot.h>
 #include <wait_bit.h>
+#include <dm/device_compat.h>
+#include <linux/err.h>
 
 #define GQSPI_GFIFO_STRT_MODE_MASK	BIT(29)
 #define GQSPI_CONFIG_MODE_EN_MASK	(3 << 30)

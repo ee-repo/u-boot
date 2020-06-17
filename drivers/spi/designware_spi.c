@@ -18,6 +18,7 @@
 #include <spi.h>
 #include <fdtdec.h>
 #include <reset.h>
+#include <dm/device_compat.h>
 #include <linux/compat.h>
 #include <linux/iopoll.h>
 #include <asm/io.h>
@@ -126,7 +127,7 @@ static inline void dw_write(struct dw_spi_priv *priv, u32 offset, u32 val)
 
 static int request_gpio_cs(struct udevice *bus)
 {
-#if defined(CONFIG_DM_GPIO) && !defined(CONFIG_SPL_BUILD)
+#if CONFIG_IS_ENABLED(DM_GPIO) && !defined(CONFIG_SPL_BUILD)
 	struct dw_spi_priv *priv = dev_get_priv(bus);
 	int ret;
 
@@ -373,7 +374,7 @@ static int poll_transfer(struct dw_spi_priv *priv)
  */
 __weak void external_cs_manage(struct udevice *dev, bool on)
 {
-#if defined(CONFIG_DM_GPIO) && !defined(CONFIG_SPL_BUILD)
+#if CONFIG_IS_ENABLED(DM_GPIO) && !defined(CONFIG_SPL_BUILD)
 	struct dw_spi_priv *priv = dev_get_priv(dev->parent);
 
 	if (!dm_gpio_is_valid(&priv->cs_gpio))
@@ -518,8 +519,22 @@ static int dw_spi_set_mode(struct udevice *bus, uint mode)
 static int dw_spi_remove(struct udevice *bus)
 {
 	struct dw_spi_priv *priv = dev_get_priv(bus);
+	int ret;
 
-	return reset_release_bulk(&priv->resets);
+	ret = reset_release_bulk(&priv->resets);
+	if (ret)
+		return ret;
+
+#if CONFIG_IS_ENABLED(CLK)
+	ret = clk_disable(&priv->clk);
+	if (ret)
+		return ret;
+
+	ret = clk_free(&priv->clk);
+	if (ret)
+		return ret;
+#endif
+	return 0;
 }
 
 static const struct dm_spi_ops dw_spi_ops = {

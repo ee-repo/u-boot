@@ -13,6 +13,8 @@
 /* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
+#define CONFIG_SYS_BOOTM_LEN	(64 * 1024 * 1024)
+
 /* linear and spi flash memory */
 #ifdef XILINX_FLASH_START
 #define	FLASH
@@ -68,37 +70,25 @@
 /* hardware flash protection */
 /* use buffered writes (20x faster) */
 # ifdef	RAMENV
-#  define CONFIG_ENV_SIZE	0x1000
-#  define CONFIG_ENV_ADDR	(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
-
 # else	/* FLASH && !RAMENV */
 /* 128K(one sector) for env */
-#  define CONFIG_ENV_SECT_SIZE	0x20000
-#  define CONFIG_ENV_ADDR \
-			(CONFIG_SYS_FLASH_BASE + (2 * CONFIG_ENV_SECT_SIZE))
-#  define CONFIG_ENV_SIZE	0x20000
 # endif /* FLASH && !RAMBOOT */
 #else /* !FLASH */
 
 #ifdef SPIFLASH
 # ifdef	RAMENV
-#  define CONFIG_ENV_SIZE	0x1000
-#  define CONFIG_ENV_ADDR	(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
-
 # else	/* SPIFLASH && !RAMENV */
 /* 128K(two sectors) for env */
-#  define CONFIG_ENV_SECT_SIZE	0x10000
-#  define CONFIG_ENV_SIZE	(2 * CONFIG_ENV_SECT_SIZE)
 /* Warning: adjust the offset in respect of other flash content and size */
-#  define CONFIG_ENV_OFFSET	(128 * CONFIG_ENV_SECT_SIZE) /* at 8MB */
 # endif /* SPIFLASH && !RAMBOOT */
 #else /* !SPIFLASH */
 
 /* ENV in RAM */
-# define CONFIG_ENV_SIZE	0x1000
-# define CONFIG_ENV_ADDR	(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
 #endif /* !SPIFLASH */
 #endif /* !FLASH */
+
+#define XILINX_USE_ICACHE 1
+#define XILINX_USE_DCACHE 1
 
 #if defined(XILINX_USE_ICACHE)
 # define CONFIG_ICACHE
@@ -152,9 +142,6 @@
 					"setenv stdin serial\0"
 #endif
 
-/* Enable flat device tree support */
-#define CONFIG_LMB		1
-
 #if defined(CONFIG_XILINX_AXIEMAC)
 # define CONFIG_SYS_FAULT_ECHO_LINK_DOWN	1
 #endif
@@ -185,8 +172,6 @@
 
 /* Just for sure that there is a space for stack */
 #define CONFIG_SPL_STACK_SIZE		0x100
-
-#define CONFIG_SYS_UBOOT_START		CONFIG_SYS_TEXT_BASE
 
 #define CONFIG_SPL_MAX_FOOTPRINT	(CONFIG_SYS_INIT_RAM_SIZE - \
 					 CONFIG_SYS_INIT_RAM_ADDR - \

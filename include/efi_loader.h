@@ -12,6 +12,16 @@
 #include <part_efi.h>
 #include <efi_api.h>
 
+static inline int guidcmp(const void *g1, const void *g2)
+{
+	return memcmp(g1, g2, sizeof(efi_guid_t));
+}
+
+static inline void *guidcpy(void *dst, const void *src)
+{
+	return memcpy(dst, src, sizeof(efi_guid_t));
+}
+
 /* No need for efi loader support in SPL */
 #if CONFIG_IS_ENABLED(EFI_LOADER)
 
@@ -28,6 +38,9 @@
 #define U_BOOT_HOST_DEV_GUID \
 	EFI_GUID(0xbbe4e671, 0x5773, 0x4ea1, \
 		 0x9a, 0xab, 0x3a, 0x7d, 0xbf, 0x40, 0xc4, 0x82)
+
+/* Use internal device tree when starting UEFI application */
+#define EFI_FDT_USE_INTERNAL NULL
 
 /* Root node */
 extern efi_handle_t efi_root;
@@ -120,6 +133,7 @@ extern const struct efi_hii_config_routing_protocol efi_hii_config_routing;
 extern const struct efi_hii_config_access_protocol efi_hii_config_access;
 extern const struct efi_hii_database_protocol efi_hii_database;
 extern const struct efi_hii_string_protocol efi_hii_string;
+extern const struct efi_rng_protocol efi_rng_protocol;
 
 uint16_t *efi_dp_str(struct efi_device_path *dp);
 
@@ -164,6 +178,9 @@ extern const efi_guid_t efi_guid_hii_config_routing_protocol;
 extern const efi_guid_t efi_guid_hii_config_access_protocol;
 extern const efi_guid_t efi_guid_hii_database_protocol;
 extern const efi_guid_t efi_guid_hii_string_protocol;
+
+/* GUID of RNG protocol */
+extern const efi_guid_t efi_guid_rng_protocol;
 
 extern unsigned int __efi_runtime_start, __efi_runtime_stop;
 extern unsigned int __efi_runtime_rel_start, __efi_runtime_rel_stop;
@@ -333,6 +350,10 @@ extern struct list_head efi_register_notify_events;
 
 /* Initialize efi execution environment */
 efi_status_t efi_init_obj_list(void);
+/* Install device tree */
+efi_status_t efi_install_fdt(void *fdt);
+/* Run loaded UEFI image */
+efi_status_t efi_run_image(void *source_buffer, efi_uintn_t source_size);
 /* Initialize variable services */
 efi_status_t efi_init_variables(void);
 /* Notify ExitBootServices() is called */
@@ -357,6 +378,7 @@ efi_status_t efi_gop_register(void);
 efi_status_t efi_net_register(void);
 /* Called by bootefi to make the watchdog available */
 efi_status_t efi_watchdog_register(void);
+efi_status_t efi_initrd_register(void);
 /* Called by bootefi to make SMBIOS tables available */
 /**
  * efi_acpi_register() - write out ACPI tables
@@ -435,6 +457,20 @@ efi_status_t efi_remove_all_protocols(const efi_handle_t handle);
 /* Install multiple protocol interfaces */
 efi_status_t EFIAPI efi_install_multiple_protocol_interfaces
 				(efi_handle_t *handle, ...);
+/* Get handles that support a given protocol */
+efi_status_t EFIAPI efi_locate_handle_buffer(
+			enum efi_locate_search_type search_type,
+			const efi_guid_t *protocol, void *search_key,
+			efi_uintn_t *no_handles, efi_handle_t **buffer);
+/* Close an previously opened protocol interface */
+efi_status_t EFIAPI efi_close_protocol(efi_handle_t handle,
+				       const efi_guid_t *protocol,
+				       efi_handle_t agent_handle,
+				       efi_handle_t controller_handle);
+/* Open a protocol interface */
+efi_status_t EFIAPI efi_handle_protocol(efi_handle_t handle,
+					const efi_guid_t *protocol,
+					void **protocol_interface);
 /* Call this to create an event */
 efi_status_t efi_create_event(uint32_t type, efi_uintn_t notify_tpl,
 			      void (EFIAPI *notify_function) (
@@ -538,7 +574,6 @@ struct efi_device_path *efi_dp_get_next_instance(struct efi_device_path **dp,
 /* Check if a device path contains muliple instances */
 bool efi_dp_is_multi_instance(const struct efi_device_path *dp);
 
-struct efi_device_path *efi_dp_from_dev(struct udevice *dev);
 struct efi_device_path *efi_dp_from_part(struct blk_desc *desc, int part);
 /* Create a device node for a block device partition. */
 struct efi_device_path *efi_dp_part_node(struct blk_desc *desc, int part);
@@ -562,11 +597,6 @@ efi_status_t efi_dp_from_name(const char *dev, const char *devnr,
 #define EFI_DP_TYPE(_dp, _type, _subtype) \
 	(((_dp)->type == DEVICE_PATH_TYPE_##_type) && \
 	 ((_dp)->sub_type == DEVICE_PATH_SUB_TYPE_##_subtype))
-
-static inline int guidcmp(const void *g1, const void *g2)
-{
-	return memcmp(g1, g2, sizeof(efi_guid_t));
-}
 
 /*
  * Use these to indicate that your code / data should go into the EFI runtime
@@ -615,7 +645,7 @@ efi_status_t EFIAPI efi_get_variable(u16 *variable_name,
 				     efi_uintn_t *data_size, void *data);
 efi_status_t EFIAPI efi_get_next_variable_name(efi_uintn_t *variable_name_size,
 					       u16 *variable_name,
-					       const efi_guid_t *vendor);
+					       efi_guid_t *vendor);
 efi_status_t EFIAPI efi_set_variable(u16 *variable_name,
 				     const efi_guid_t *vendor, u32 attributes,
 				     efi_uintn_t data_size, const void *data);

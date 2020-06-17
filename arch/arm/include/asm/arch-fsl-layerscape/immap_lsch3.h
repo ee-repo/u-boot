@@ -23,7 +23,13 @@
 #define CONFIG_SYS_FSL_CH3_CLK_GRPA_ADDR	(CONFIG_SYS_IMMR + 0x00300000)
 #define CONFIG_SYS_FSL_CH3_CLK_GRPB_ADDR	(CONFIG_SYS_IMMR + 0x00310000)
 #define CONFIG_SYS_FSL_CH3_CLK_CTRL_ADDR	(CONFIG_SYS_IMMR + 0x00370000)
+#ifndef CONFIG_NXP_LSCH3_2
 #define SYS_FSL_QSPI_ADDR			(CONFIG_SYS_IMMR + 0x010c0000)
+#else
+#define SYS_NXP_FSPI_ADDR			(CONFIG_SYS_IMMR + 0x010c0000)
+#define SYS_NXP_FSPI_LUTKEY_BASE_ADDR		0x18
+#define SYS_NXP_FSPI_LUT_BASE_ADDR		0x200
+#endif
 #define CONFIG_SYS_FSL_ESDHC_ADDR		(CONFIG_SYS_IMMR + 0x01140000)
 #define FSL_ESDHC1_BASE_ADDR			CONFIG_SYS_FSL_ESDHC_ADDR
 #define FSL_ESDHC2_BASE_ADDR			(CONFIG_SYS_IMMR + 0x01150000)
@@ -87,6 +93,8 @@
 /* SATA */
 #define AHCI_BASE_ADDR1				(CONFIG_SYS_IMMR + 0x02200000)
 #define AHCI_BASE_ADDR2				(CONFIG_SYS_IMMR + 0x02210000)
+#define AHCI_BASE_ADDR3				(CONFIG_SYS_IMMR + 0x02220000)
+#define AHCI_BASE_ADDR4				(CONFIG_SYS_IMMR + 0x02230000)
 
 /* QDMA */
 #define QDMA_BASE_ADDR				(CONFIG_SYS_IMMR + 0x07380000)
@@ -250,8 +258,14 @@
 #define DCSR_USB_PHY_RX_OVRD_IN_HI	0x200C
 #define USB_PHY_RX_EQ_VAL_1		0x0000
 #define USB_PHY_RX_EQ_VAL_2		0x0080
+#if defined(CONFIG_ARCH_LS2080A) || defined(CONFIG_ARCH_LS1088A) || \
+	defined(CONFIG_ARCH_LS1028A)
 #define USB_PHY_RX_EQ_VAL_3		0x0380
 #define USB_PHY_RX_EQ_VAL_4		0x0b80
+#elif defined(CONFIG_ARCH_LX2160A)
+#define USB_PHY_RX_EQ_VAL_3		0x0080
+#define USB_PHY_RX_EQ_VAL_4		0x0880
+#endif
 #define DCSR_USB_IOCR1			0x108004
 #define DCSR_USB_PCSTXSWINGFULL	0x71
 
@@ -445,7 +459,9 @@ struct ccsr_gur {
 	u8	res_538[0x550 - 0x538];	/* add more registers when needed */
 	u32	sata1_amqr;
 	u32	sata2_amqr;
-	u8	res_558[0x570-0x558];	/* add more registers when needed */
+	u32	sata3_amqr;
+	u32	sata4_amqr;
+	u8	res_560[0x570 - 0x560];	/* add more registers when needed */
 	u32	misc1_amqr;
 	u8	res_574[0x590-0x574];	/* add more registers when needed */
 	u32	spare1_amqr;

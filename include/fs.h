@@ -14,6 +14,28 @@
 #define FS_TYPE_UBIFS	4
 #define FS_TYPE_BTRFS	5
 
+/**
+ * do_fat_fsload - Run the fatload command
+ *
+ * @cmdtp: Command information for fatload
+ * @flag: Command flags (CMD_FLAG_...)
+ * @argc: Number of arguments
+ * @argv: List of arguments
+ * @return result (see enum command_ret_t)
+ */
+int do_fat_fsload(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]);
+
+/**
+ * do_ext2load - Run the ext2load command
+ *
+ * @cmdtp: Command information for ext2load
+ * @flag: Command flags (CMD_FLAG_...)
+ * @argc: Number of arguments
+ * @argv: List of arguments
+ * @return result (see enum command_ret_t)
+ */
+int do_ext2load(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]);
+
 /*
  * Tell the fs layer which block device an partition to use for future
  * commands. This also internally identifies the filesystem that is present
@@ -36,6 +58,28 @@ int fs_set_blk_dev(const char *ifname, const char *dev_part_str, int fstype);
  * Returns non-zero if invalid partition or error accessing the disk.
  */
 int fs_set_blk_dev_with_part(struct blk_desc *desc, int part);
+
+/**
+ * fs_close() - Unset current block device and partition
+ *
+ * fs_close() closes the connection to a file system opened with either
+ * fs_set_blk_dev() or fs_set_dev_with_part().
+ *
+ * Many file functions implicitly call fs_close(), e.g. fs_closedir(),
+ * fs_exist(), fs_ln(), fs_ls(), fs_mkdir(), fs_read(), fs_size(), fs_write(),
+ * fs_unlink().
+ */
+void fs_close(void);
+
+/**
+ * fs_get_type() - Get type of current filesystem
+ *
+ * Return: filesystem type
+ *
+ * Returns filesystem type representing the current filesystem, or
+ * FS_TYPE_ANY for any unrecognised filesystem.
+ */
+int fs_get_type(void);
 
 /**
  * fs_get_type_name() - Get type of current filesystem

@@ -10,6 +10,10 @@
  */
 
 #include <common.h>
+#include <cpu_func.h>
+#include <irq_func.h>
+#include <time.h>
+#include <vsprintf.h>
 #include <watchdog.h>
 #include <command.h>
 #include <mpc83xx.h>
@@ -194,7 +198,7 @@ void watchdog_reset (void)
 	immr->wdt.swsrr = 0xaa39;
 
 	if (re_enable)
-		enable_interrupts ();
+		enable_interrupts();
 }
 #endif
 

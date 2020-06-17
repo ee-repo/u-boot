@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <cpu_func.h>
 #include <dm.h>
 #include <errno.h>
 #include <usb.h>
@@ -14,6 +15,7 @@
 #include <usbroothubdes.h>
 #include <wait_bit.h>
 #include <asm/io.h>
+#include <dm/device_compat.h>
 #include <power/regulator.h>
 #include <reset.h>
 

@@ -15,6 +15,8 @@
 
 #include <common.h>
 #include <env.h>
+#include <fdt_support.h>
+#include <init.h>
 #include <ioports.h>
 #include <mpc83xx.h>
 #include <i2c.h>
@@ -185,7 +187,8 @@ int board_early_init_r(void)
 
 int misc_init_r(void)
 {
-	ivm_read_eeprom(ivm_content, CONFIG_SYS_IVM_EEPROM_MAX_LEN);
+	ivm_read_eeprom(ivm_content, CONFIG_SYS_IVM_EEPROM_MAX_LEN,
+			CONFIG_PIGGY_MAC_ADDRESS_OFFSET);
 	return 0;
 }
 
@@ -276,7 +279,7 @@ int dram_init(void)
 
 int checkboard(void)
 {
-	puts("Board: Keymile " CONFIG_KM_BOARD_NAME);
+	puts("Board: ABB " CONFIG_SYS_CONFIG_NAME);
 
 	if (piggy_present())
 		puts(" with PIGGY.");

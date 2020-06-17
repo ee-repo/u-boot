@@ -22,8 +22,6 @@
 #define FDT_MODULE_V1_0			"apalis"
 
 /* Environment in eMMC, before config block at the end of 1st "boot sector" */
-#define CONFIG_ENV_OFFSET		(-CONFIG_ENV_SIZE + \
-					 CONFIG_TDX_CFG_BLOCK_OFFSET)
 #define CONFIG_SYS_MMC_ENV_DEV		0
 #define CONFIG_SYS_MMC_ENV_PART		1
 
@@ -47,6 +45,14 @@
 				"rootfs part 0 2 mmcpart 0; " \
 				"zImage fat 0 1 mmcpart 0; " \
 				"tegra124-apalis-eval.dtb fat 0 1 mmcpart 0"
+
+#define UBOOT_UPDATE \
+	"uboot_hwpart=1\0" \
+	"uboot_blk=0\0" \
+	"set_blkcnt=setexpr blkcnt ${filesize} + 0x1ff && " \
+		"setexpr blkcnt ${blkcnt} / 0x200\0" \
+	"update_uboot=run set_blkcnt && mmc dev 0 ${uboot_hwpart} && " \
+		"mmc write ${loadaddr} ${uboot_blk} ${blkcnt}\0" \
 
 #define EMMC_BOOTCMD \
 	"set_emmcargs=setenv emmcargs ip=off root=PARTUUID=${uuid} " \
@@ -106,6 +112,7 @@
 	"fdt_module=" FDT_MODULE "\0" \
 	NFS_BOOTCMD \
 	SD_BOOTCMD \
+	UBOOT_UPDATE \
 	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
 		"00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} " \
 		"flash_eth.img && source ${loadaddr}\0" \
@@ -137,8 +144,6 @@
 #define CONFIG_SYS_MAXARGS		32
 
 #define CONFIG_CMD_TIME
-
-#define CONFIG_SYS_BOOT_RAMDISK_HIGH
 
 #include "tegra-common-usb-gadget.h"
 #include "tegra-common-post.h"

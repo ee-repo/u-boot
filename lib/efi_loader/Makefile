@@ -6,6 +6,9 @@
 # This file only gets included with CONFIG_EFI_LOADER set, so all
 # object inclusion implicitly depends on it
 
+asflags-y += -DHOST_ARCH="$(HOST_ARCH)"
+ccflags-y += -DHOST_ARCH="$(HOST_ARCH)"
+
 CFLAGS_efi_boottime.o += \
   -DFW_VERSION="0x$(VERSION)" \
   -DFW_PATCHLEVEL="0x$(PATCHLEVEL)"
@@ -39,3 +42,5 @@ obj-$(CONFIG_PARTITIONS) += efi_disk.o
 obj-$(CONFIG_NET) += efi_net.o
 obj-$(CONFIG_GENERATE_ACPI_TABLE) += efi_acpi.o
 obj-$(CONFIG_GENERATE_SMBIOS_TABLE) += efi_smbios.o
+obj-$(CONFIG_EFI_RNG_PROTOCOL) += efi_rng.o
+obj-$(CONFIG_EFI_LOAD_FILE2_INITRD) += efi_load_initrd.o

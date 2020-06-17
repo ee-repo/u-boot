@@ -13,6 +13,12 @@
 	compatible = "fsl,p2020-immr", "simple-bus";
 	bus-frequency = <0x0>;
 
+	usb@22000 {
+		compatible = "fsl-usb2-dr";
+		reg = <0x22000 0x1000>;
+		phy_type = "ulpi";
+	};
+
 	mpic: pic@40000 {
 		interrupt-controller;
 		#address-cells = <0>;
@@ -23,6 +29,13 @@
 		big-endian;
 		single-cpu-affinity;
 		last-interrupt-source = <255>;
+	};
+
+	esdhc: esdhc@2e000 {
+		compatible = "fsl,esdhc";
+		reg = <0x2e000 0x1000>;
+		/* Filled in by U-Boot */
+		clock-frequency = <0>;
 	};
 };
 

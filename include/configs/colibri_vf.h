@@ -58,6 +58,10 @@
 	"ramdisk_addr_r=0x82100000\0" \
 	"scriptaddr=0x87000000\0"
 
+#define UBOOT_UPDATE \
+	"update_uboot=nand erase.part u-boot && " \
+		"nand write ${loadaddr} u-boot ${filesize}\0" \
+
 #define NFS_BOOTCMD \
 	"nfsargs=ip=:::::eth0: root=/dev/nfs\0"	\
 	"nfsboot=run setup; " \
@@ -112,6 +116,7 @@
 	NFS_BOOTCMD \
 	SD_BOOTCMD \
 	UBI_BOOTCMD \
+	UBOOT_UPDATE \
 	"console=ttyLP0\0" \
 	"defargs=user_debug=30\0" \
 	"dfu_alt_info=" DFU_ALT_NAND_INFO "\0" \
@@ -156,9 +161,7 @@
 
 /* Environment organization */
 #ifdef CONFIG_ENV_IS_IN_NAND
-#define CONFIG_ENV_SIZE			(64 * 2048)
 #define CONFIG_ENV_RANGE		(4 * 64 * 2048)
-#define CONFIG_ENV_OFFSET		(12 * 64 * 2048)
 #endif
 
 /* USB Host Support */

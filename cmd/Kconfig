@@ -48,6 +48,8 @@ config SYS_LONGHELP
 
 config SYS_PROMPT
 	string "Shell prompt"
+	default "Zynq> " if ARCH_ZYNQ
+	default "ZynqMP> " if ARCH_ZYNQMP
 	default "=> "
 	help
 	  This string is displayed in the command line to the left of the
@@ -226,11 +228,33 @@ config CMD_LICENSE
 	help
 	  Print GPL license text
 
+config CMD_PMC
+	bool "pmc"
+	help
+	  Provides access to the Intel Power-Management Controller (PMC) so
+	  that its state can be examined. This does not currently support
+	  changing the state but it is still useful for debugging and seeing
+	  what is going on.
+
 config CMD_REGINFO
 	bool "reginfo"
 	depends on PPC
 	help
 	  Register dump
+
+config CMD_TLV_EEPROM
+	bool "tlv_eeprom"
+	depends on I2C_EEPROM
+	help
+	  Display and program the system EEPROM data block in ONIE Tlvinfo
+	  format. TLV stands for Type-Length-Value.
+
+config SPL_CMD_TLV_EEPROM
+	bool "tlv_eeprom for SPL"
+	depends on SPL_I2C_EEPROM
+	select SPL_DRIVERS_MISC_SUPPORT
+	help
+	  Read system EEPROM data block in ONIE Tlvinfo format from SPL.
 
 endmenu
 
@@ -249,6 +273,13 @@ config CMD_BOOTM
 	help
 	  Boot an application image from the memory.
 
+config BOOTM_EFI
+	bool "Support booting UEFI FIT images"
+	depends on CMD_BOOTEFI && CMD_BOOTM && FIT
+	default y
+	help
+	  Support booting UEFI FIT images via the bootm command.
+
 config CMD_BOOTZ
 	bool "bootz"
 	help
@@ -260,13 +291,6 @@ config CMD_BOOTI
 	default y
 	help
 	  Boot an AArch64 Linux Kernel image from memory.
-
-config CMD_BOOTEFI
-	bool "bootefi"
-	depends on EFI_LOADER
-	default y
-	help
-	  Boot an EFI image from memory.
 
 config BOOTM_LINUX
 	bool "Support booting Linux OS images"
@@ -291,6 +315,7 @@ config BOOTM_OPENRTOS
 
 config BOOTM_OSE
 	bool "Support booting Enea OSE images"
+	depends on (ARM && (ARM64 || CPU_V7A || CPU_V7R) || SANDBOX || PPC || X86)
 	depends on CMD_BOOTM
 	help
 	  Support booting Enea OSE images via the bootm command.
@@ -316,9 +341,16 @@ config BOOTM_VXWORKS
 	help
 	  Support booting VxWorks images via the bootm command.
 
+config CMD_BOOTEFI
+	bool "bootefi"
+	depends on EFI_LOADER
+	default y
+	help
+	  Boot an EFI image from memory.
+
 config CMD_BOOTEFI_HELLO_COMPILE
 	bool "Compile a standard EFI hello world binary for testing"
-	depends on CMD_BOOTEFI && !CPU_V7M && !SANDBOX
+	depends on CMD_BOOTEFI && !CPU_V7M
 	default y
 	help
 	  This compiles a standard EFI hello world application with U-Boot so
@@ -346,13 +378,23 @@ config CMD_BOOTMENU
 	help
 	  Add an ANSI terminal boot menu command.
 
-config CMD_DTIMG
-	bool "dtimg"
+config CMD_ADTIMG
+	bool "adtimg"
 	help
 	  Android DTB/DTBO image manipulation commands. Read dtb/dtbo files from
 	  image into RAM, dump image structure information, etc. Those dtb/dtbo
 	  files should be merged in one dtb further, which needs to be passed to
 	  the kernel, as part of a boot process.
+
+config CMD_ABOOTIMG
+	bool "abootimg"
+	depends on ANDROID_BOOT_IMAGE
+	help
+	  Android Boot Image manipulation commands. Allows one to extract
+	  images contained in boot.img, like kernel, ramdisk, dtb, etc, and
+	  obtain corresponding meta-information from boot.img.
+
+	  See doc/android/boot-image.rst for details.
 
 config CMD_ELF
 	bool "bootelf, bootvx"
@@ -440,6 +482,7 @@ config CMD_FITUPD
 
 config CMD_THOR_DOWNLOAD
 	bool "thor - TIZEN 'thor' download"
+	select DFU
 	help
 	  Implements the 'thor' download protocol. This is a way of
 	  downloading a software update over USB from an attached host.
@@ -531,7 +574,6 @@ config CMD_ENV_FLAGS
 config CMD_NVEDIT_EFI
 	bool "env [set|print] -e - set/print UEFI variables"
 	depends on EFI_LOADER
-	default y
 	imply HEXDUMP
 	help
 	  UEFI variables are encoded as some form of U-Boot variables.
@@ -660,7 +702,7 @@ config CMD_MEMORY
 	    base - print or set address offset
 	    loop - initialize loop on address range
 
-config MX_CYCLIC
+config CMD_MX_CYCLIC
 	bool "Enable cyclic md/mw commands"
 	depends on CMD_MEMORY
 	help
@@ -694,12 +736,6 @@ config SYS_ALT_MEMTEST
 	  Use a more complete alternative memory test.
 
 endif
-
-config CMD_MX_CYCLIC
-	bool "mdc, mwc"
-	help
-	  mdc - memory display cyclic
-	  mwc - memory write cyclic
 
 config CMD_SHA1SUM
 	bool "sha1sum"
@@ -838,16 +874,12 @@ config CMD_FASTBOOT
 	  Android devices. Fastboot requires either the network stack
 	  enabled or support for acting as a USB device.
 
-	  See doc/android/fastboot.txt for more information.
-
-config CMD_FDC
-	bool "fdcboot - Boot from floppy device"
-	help
-	  The 'fdtboot' command allows booting an image from a floppy disk.
+	  See doc/android/fastboot.rst for more information.
 
 config CMD_FLASH
 	bool "flinfo, erase, protect"
 	default y
+	depends on MTD || FLASH_CFI_DRIVER || MTD_NOR_FLASH
 	help
 	  NOR flash support.
 	    flinfo - print FLASH memory information
@@ -1037,6 +1069,7 @@ config CMD_MMC_SWRITE
 
 config CMD_MTD
 	bool "mtd"
+	depends on MTD
 	select MTD_PARTITIONS
 	help
 	  MTD commands support.
@@ -1044,6 +1077,7 @@ config CMD_MTD
 config CMD_NAND
 	bool "nand"
 	default y if NAND_SUNXI
+	depends on MTD_RAW_NAND
 	help
 	  NAND support.
 
@@ -1075,6 +1109,7 @@ config CMD_NVME
 
 config CMD_ONENAND
 	bool "onenand - access to onenand device"
+	depends on MTD
 	help
 	  OneNAND is a brand of NAND ('Not AND' gate) flash which provides
 	  various useful features. This command allows reading, writing,
@@ -1167,6 +1202,7 @@ config CMD_SDRAM
 config CMD_SF
 	bool "sf"
 	depends on DM_SPI_FLASH || SPI_FLASH
+	default y if DM_SPI_FLASH
 	help
 	  SPI Flash support
 
@@ -1203,6 +1239,13 @@ config CMD_TSI148
 	help
 	  This provides various sub-commands to initialise and configure the
 	  Turndra tsi148 device. See the command help for full details.
+
+config CMD_UFS
+	bool "Enable UFS - Universal Flash Subsystem commands"
+	depends on UFS
+	help
+	  "This provides commands to initialise and configure universal flash
+	   subsystem devices"
 
 config CMD_UNIVERSE
 	bool "universe - Command to set up the Turndra Universe controller"
@@ -1459,8 +1502,22 @@ config CMD_NFS
 
 config CMD_MII
 	bool "mii"
+	imply CMD_MDIO
 	help
-	  Enable MII utility commands.
+	  If set, allows 802.3(clause 22) MII Management functions interface access
+	  The management interface specified in Clause 22 provides
+	  a simple, two signal, serial interface to connect a
+	  Station Management entity and a managed PHY for providing access
+	  to management parameters and services.
+	  The interface is referred to as the MII management interface.
+
+config CMD_MDIO
+	bool "mdio"
+	depends on PHYLIB
+	help
+	  If set, allows Enable 802.3(clause 45) MDIO interface registers access
+	  The MDIO interface is orthogonal to the MII interface and extends
+	  it by adding access to more registers through indirect addressing.
 
 config CMD_PING
 	bool "ping"
@@ -1611,6 +1668,7 @@ config CMD_LED
 config CMD_DATE
 	bool "date"
 	default y if DM_RTC
+	select LIB_DATE
 	help
 	  Enable the 'date' command for getting/setting the time/date in RTC
 	  devices.
@@ -1627,6 +1685,13 @@ config CMD_GETTIME
 	  U-Boot started running. This shows the time in seconds and
 	  milliseconds. See also the 'bootstage' command which provides more
 	  flexibility for boot timing.
+
+config CMD_RNG
+	bool "rng command"
+	depends on DM_RNG
+	select HEXDUMP
+	help
+	  Print bytes from the hardware random number generator.
 
 # TODO: rename to CMD_SLEEP
 config CMD_MISC
@@ -1656,6 +1721,12 @@ config CMD_SOUND
 
 	     sound init   - set up sound system
 	     sound play   - play a sound
+
+config CMD_SYSBOOT
+	bool "sysboot"
+	select MENU
+	help
+	  Boot image via local extlinux.conf file
 
 config CMD_QFW
 	bool "qfw"
@@ -1944,27 +2015,13 @@ config CMD_JFFS2
 
 config CMD_MTDPARTS
 	bool "MTD partition support"
-	select MTD_DEVICE if (CMD_NAND || NAND)
+	depends on MTD
 	help
 	  MTD partitioning tool support.
 	  It is strongly encouraged to avoid using this command
 	  anymore along with 'sf', 'nand', 'onenand'. One can still
 	  declare the partitions in the mtdparts environment variable
 	  but better use the MTD stack and the 'mtd' command instead.
-
-config MTDIDS_DEFAULT
-	string "Default MTD IDs"
-	depends on MTD_PARTITIONS || CMD_MTDPARTS || CMD_NAND || CMD_FLASH
-	help
-	  Defines a default MTD IDs list for use with MTD partitions in the
-	  Linux MTD command line partitions format.
-
-config MTDPARTS_DEFAULT
-	string "Default MTD partition scheme"
-	depends on MTD_PARTITIONS || CMD_MTDPARTS || CMD_NAND || CMD_FLASH
-	help
-	  Defines a default MTD partitioning scheme in the Linux MTD command
-	  line partitions format
 
 config CMD_MTDPARTS_SPREAD
 	bool "Padd partition size to take account of bad blocks"
@@ -1975,6 +2032,28 @@ config CMD_MTDPARTS_SPREAD
 	  the size of the partitions such that 1) each partition's net size is
 	  at least as large as the size specified in the mtdparts variable and
 	  2) each partition starts on a good block.
+
+config CMD_MTDPARTS_SHOW_NET_SIZES
+	bool "Show net size (w/o bad blocks) of partitions"
+	depends on CMD_MTDPARTS
+	help
+	  Adds two columns to the printed partition table showing the
+	  effective usable size of a partition, if bad blocks are taken
+	  into account.
+
+config MTDIDS_DEFAULT
+	string "Default MTD IDs"
+	depends on MTD || SPI_FLASH
+	help
+	  Defines a default MTD IDs list for use with MTD partitions in the
+	  Linux MTD command line partitions format.
+
+config MTDPARTS_DEFAULT
+	string "Default MTD partition scheme"
+	depends on MTD || SPI_FLASH
+	help
+	  Defines a default MTD partitioning scheme in the Linux MTD command
+	  line partitions format
 
 config CMD_REISER
 	bool "reiser - Access to reiserfs filesystems"

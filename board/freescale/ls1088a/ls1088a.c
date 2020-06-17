@@ -811,13 +811,6 @@ void detail_board_ddr_info(void)
 	print_ddr_info(0);
 }
 
-#if defined(CONFIG_ARCH_MISC_INIT)
-int arch_misc_init(void)
-{
-	return 0;
-}
-#endif
-
 #ifdef CONFIG_FSL_MC_ENET
 void board_quiesce_devices(void)
 {
@@ -1008,8 +1001,10 @@ int is_flash_available(void)
 }
 #endif
 
+#ifdef CONFIG_ENV_IS_IN_SPI_FLASH
 void *env_sf_get_env_addr(void)
 {
 	return (void *)(CONFIG_SYS_FSL_QSPI_BASE + CONFIG_ENV_OFFSET);
 }
+#endif
 #endif

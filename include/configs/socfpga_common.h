@@ -21,14 +21,15 @@
 #define CONFIG_SYS_MEMTEST_END		PHYS_SDRAM_1_SIZE
 #if defined(CONFIG_TARGET_SOCFPGA_GEN5)
 #define CONFIG_SYS_INIT_RAM_ADDR	0xFFFF0000
-#define CONFIG_SYS_INIT_RAM_SIZE	0x10000
+#define CONFIG_SYS_INIT_RAM_SIZE	SOCFPGA_PHYS_OCRAM_SIZE
 #elif defined(CONFIG_TARGET_SOCFPGA_ARRIA10)
 #define CONFIG_SYS_INIT_RAM_ADDR	0xFFE00000
 /* SPL memory allocation configuration, this is for FAT implementation */
 #ifndef CONFIG_SYS_SPL_MALLOC_SIZE
 #define CONFIG_SYS_SPL_MALLOC_SIZE	0x10000
 #endif
-#define CONFIG_SYS_INIT_RAM_SIZE	(0x40000 - CONFIG_SYS_SPL_MALLOC_SIZE)
+#define CONFIG_SYS_INIT_RAM_SIZE	(SOCFPGA_PHYS_OCRAM_SIZE - \
+					 CONFIG_SYS_SPL_MALLOC_SIZE)
 #define CONFIG_SYS_SPL_MALLOC_START	(CONFIG_SYS_INIT_RAM_ADDR + \
 					 CONFIG_SYS_INIT_RAM_SIZE)
 #endif
@@ -94,22 +95,19 @@
  * L4 OSC1 Timer 0
  */
 #ifndef CONFIG_TIMER
-/* This timer uses eosc1, whose clock frequency is fixed at any condition. */
 #define CONFIG_SYS_TIMERBASE		SOCFPGA_OSC1TIMER0_ADDRESS
 #define CONFIG_SYS_TIMER_COUNTS_DOWN
 #define CONFIG_SYS_TIMER_COUNTER	(CONFIG_SYS_TIMERBASE + 0x4)
+#ifndef CONFIG_SYS_TIMER_RATE
 #define CONFIG_SYS_TIMER_RATE		25000000
+#endif
 #endif
 
 /*
  * L4 Watchdog
  */
-#ifdef CONFIG_HW_WATCHDOG
-#define CONFIG_DESIGNWARE_WATCHDOG
 #define CONFIG_DW_WDT_BASE		SOCFPGA_L4WD0_ADDRESS
 #define CONFIG_DW_WDT_CLOCK_KHZ		25000
-#define CONFIG_WATCHDOG_TIMEOUT_MSECS	30000
-#endif
 
 /*
  * MMC Driver
@@ -124,6 +122,7 @@
  * NAND Support
  */
 #ifdef CONFIG_NAND_DENALI
+#define CONFIG_SYS_NAND_BAD_BLOCK_POS	0
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
 #define CONFIG_SYS_NAND_ONFI_DETECTION
 #define CONFIG_SYS_NAND_REGS_BASE	SOCFPGA_NANDREGS_ADDRESS
@@ -133,10 +132,6 @@
 /*
  * QSPI support
  */
-/* Enable multiple SPI NOR flash manufacturers */
-#ifndef CONFIG_SPL_BUILD
-#define CONFIG_SPI_FLASH_MTD
-#endif
 /* QSPI reference clock */
 #ifndef __ASSEMBLY__
 unsigned int cm_get_qspi_controller_clk_hz(void);
@@ -162,21 +157,13 @@ unsigned int cm_get_qspi_controller_clk_hz(void);
 /*
  * U-Boot environment
  */
-#if !defined(CONFIG_ENV_SIZE)
-#define CONFIG_ENV_SIZE			(8 * 1024)
-#endif
 
 /* Environment for SDMMC boot */
-#if defined(CONFIG_ENV_IS_IN_MMC) && !defined(CONFIG_ENV_OFFSET)
+#if defined(CONFIG_ENV_IS_IN_MMC)
 #define CONFIG_SYS_MMC_ENV_DEV		0 /* device 0 */
-#define CONFIG_ENV_OFFSET		(34 * 512) /* just after the GPT */
 #endif
 
 /* Environment for QSPI boot */
-#if defined(CONFIG_ENV_IS_IN_SPI_FLASH) && !defined(CONFIG_ENV_OFFSET)
-#define CONFIG_ENV_OFFSET		0x00100000
-#define CONFIG_ENV_SECT_SIZE		(64 * 1024)
-#endif
 
 /*
  * SPL

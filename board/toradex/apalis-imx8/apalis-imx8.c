@@ -4,6 +4,8 @@
  */
 
 #include <common.h>
+#include <cpu_func.h>
+#include <init.h>
 
 #include <asm/arch/clock.h>
 #include <asm/arch/imx8-pins.h>
@@ -50,7 +52,7 @@ int board_early_init_f(void)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DM_GPIO)
+#if CONFIG_IS_ENABLED(DM_GPIO)
 static void board_gpio_init(void)
 {
 	/* TODO */
@@ -86,11 +88,6 @@ int board_init(void)
 	board_gpio_init();
 
 	return 0;
-}
-
-void detail_board_ddr_info(void)
-{
-	puts("\nDDR    ");
 }
 
 /*

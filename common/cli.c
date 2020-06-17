@@ -11,9 +11,11 @@
 #include <common.h>
 #include <cli.h>
 #include <cli_hush.h>
+#include <command.h>
 #include <console.h>
 #include <env.h>
 #include <fdtdec.h>
+#include <hang.h>
 #include <malloc.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -68,6 +70,13 @@ int run_command_repeatable(const char *cmd, int flag)
 
 	return 0;
 #endif
+}
+#else
+__weak int board_run_command(const char *cmdline)
+{
+	printf("## Commands are disabled. Please enable CONFIG_CMDLINE.\n");
+
+	return 1;
 }
 #endif /* CONFIG_CMDLINE */
 

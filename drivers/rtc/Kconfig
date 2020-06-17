@@ -7,6 +7,7 @@ menu "Real Time Clock"
 config DM_RTC
 	bool "Enable Driver Model for RTC drivers"
 	depends on DM
+	select LIB_DATE
 	help
 	  Enable drver model for real-time-clock drivers. The RTC uclass
 	  then provides the rtc_get()/rtc_set() interface, delegating to
@@ -53,6 +54,14 @@ config RTC_DS1307
 	help
 	  Support for Dallas Semiconductor (now Maxim) DS1307 and DS1338/9 and
 	  compatible Real Time Clock devices.
+
+config RTC_DS3232
+	bool "Enable DS3232 driver"
+	depends on DM_RTC
+	depends on DM_I2C
+	help
+	  Support for Dallas Semiconductor (now Maxim) DS3232 compatible
+	  Real Time Clock devices.
 
 config RTC_ISL1208
 	bool "Enable ISL1208 driver"

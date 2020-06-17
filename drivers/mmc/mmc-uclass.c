@@ -8,7 +8,9 @@
 #include <mmc.h>
 #include <dm.h>
 #include <dm/device-internal.h>
+#include <dm/device_compat.h>
 #include <dm/lists.h>
+#include <linux/compat.h>
 #include "mmc_private.h"
 
 int dm_mmc_send_cmd(struct udevice *dev, struct mmc_cmd *cmd,
@@ -121,6 +123,35 @@ int mmc_set_enhanced_strobe(struct mmc *mmc)
 	return dm_mmc_set_enhanced_strobe(mmc->dev);
 }
 #endif
+
+int dm_mmc_host_power_cycle(struct udevice *dev)
+{
+	struct dm_mmc_ops *ops = mmc_get_ops(dev);
+
+	if (ops->host_power_cycle)
+		return ops->host_power_cycle(dev);
+	return 0;
+}
+
+int mmc_host_power_cycle(struct mmc *mmc)
+{
+	return dm_mmc_host_power_cycle(mmc->dev);
+}
+
+int dm_mmc_deferred_probe(struct udevice *dev)
+{
+	struct dm_mmc_ops *ops = mmc_get_ops(dev);
+
+	if (ops->deferred_probe)
+		return ops->deferred_probe(dev);
+
+	return 0;
+}
+
+int mmc_deferred_probe(struct mmc *mmc)
+{
+	return dm_mmc_deferred_probe(mmc->dev);
+}
 
 int mmc_of_parse(struct udevice *dev, struct mmc_config *cfg)
 {

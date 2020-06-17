@@ -11,6 +11,7 @@
 #include <dm.h>
 #include <dt-structs.h>
 #include <errno.h>
+#include <hang.h>
 #include <ram.h>
 #include <regmap.h>
 #include <syscon.h>
@@ -21,7 +22,7 @@
 #include <asm/arch-rockchip/grf_rk3188.h>
 #include <asm/arch-rockchip/pmu_rk3188.h>
 #include <asm/arch-rockchip/sdram.h>
-#include <asm/arch-rockchip/sdram_common.h>
+#include <asm/arch-rockchip/sdram_rk3288.h>
 #include <linux/err.h>
 
 struct chan_info {

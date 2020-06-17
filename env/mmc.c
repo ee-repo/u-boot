@@ -22,16 +22,7 @@
 #define __STR(X) #X
 #define STR(X) __STR(X)
 
-#if defined(CONFIG_ENV_SIZE_REDUND) &&  \
-	(CONFIG_ENV_SIZE_REDUND != CONFIG_ENV_SIZE)
-#error CONFIG_ENV_SIZE_REDUND should be the same as CONFIG_ENV_SIZE
-#endif
-
 DECLARE_GLOBAL_DATA_PTR;
-
-#if !defined(CONFIG_ENV_OFFSET)
-#define CONFIG_ENV_OFFSET 0
-#endif
 
 #if CONFIG_IS_ENABLED(OF_CONTROL)
 static inline int mmc_offset_try_partition(const char *str, s64 *val)
@@ -362,6 +353,7 @@ static int env_mmc_load(void)
 	int ret;
 	int dev = mmc_get_env_dev();
 	const char *errmsg;
+	env_t *ep = NULL;
 
 	mmc = find_mmc_device(dev);
 
@@ -383,6 +375,10 @@ static int env_mmc_load(void)
 	}
 
 	ret = env_import(buf, 1);
+	if (!ret) {
+		ep = (env_t *)buf;
+		gd->env_addr = (ulong)&ep->data;
+	}
 
 fini:
 	fini_mmc_for_env(mmc);

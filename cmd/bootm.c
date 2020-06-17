@@ -19,6 +19,7 @@
 #include <linux/ctype.h>
 #include <linux/err.h>
 #include <u-boot/zlib.h>
+#include <mapmem.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -143,7 +144,8 @@ int bootm_maybe_autostart(cmd_tbl_t *cmdtp, const char *cmd)
 		char *local_args[2];
 		local_args[0] = (char *)cmd;
 		local_args[1] = NULL;
-		printf("Automatic boot of image at addr 0x%08lX ...\n", load_addr);
+		printf("Automatic boot of image at addr 0x%08lX ...\n",
+		       image_load_addr);
 		return do_bootm(cmdtp, 0, 1, local_args);
 	}
 
@@ -231,7 +233,7 @@ static int do_iminfo(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	int	rcode = 0;
 
 	if (argc < 2) {
-		return image_info(load_addr);
+		return image_info(image_load_addr);
 	}
 
 	for (arg = 1; arg < argc; ++arg) {
@@ -244,7 +246,7 @@ static int do_iminfo(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 static int image_info(ulong addr)
 {
-	void *hdr = (void *)addr;
+	void *hdr = (void *)map_sysmem(addr, 0);
 
 	printf("\n## Checking Image at %08lx ...\n", addr);
 
@@ -254,11 +256,13 @@ static int image_info(ulong addr)
 		puts("   Legacy image found\n");
 		if (!image_check_magic(hdr)) {
 			puts("   Bad Magic Number\n");
+			unmap_sysmem(hdr);
 			return 1;
 		}
 
 		if (!image_check_hcrc(hdr)) {
 			puts("   Bad Header Checksum\n");
+			unmap_sysmem(hdr);
 			return 1;
 		}
 
@@ -267,15 +271,18 @@ static int image_info(ulong addr)
 		puts("   Verifying Checksum ... ");
 		if (!image_check_dcrc(hdr)) {
 			puts("   Bad Data CRC\n");
+			unmap_sysmem(hdr);
 			return 1;
 		}
 		puts("OK\n");
+		unmap_sysmem(hdr);
 		return 0;
 #endif
 #if defined(CONFIG_ANDROID_BOOT_IMAGE)
 	case IMAGE_FORMAT_ANDROID:
 		puts("   Android image found\n");
 		android_print_contents(hdr);
+		unmap_sysmem(hdr);
 		return 0;
 #endif
 #if defined(CONFIG_FIT)
@@ -284,6 +291,7 @@ static int image_info(ulong addr)
 
 		if (!fit_check_format(hdr)) {
 			puts("Bad FIT image format!\n");
+			unmap_sysmem(hdr);
 			return 1;
 		}
 
@@ -291,9 +299,11 @@ static int image_info(ulong addr)
 
 		if (!fit_all_image_verify(hdr)) {
 			puts("Bad hash in FIT image!\n");
+			unmap_sysmem(hdr);
 			return 1;
 		}
 
+		unmap_sysmem(hdr);
 		return 0;
 #endif
 	default:
@@ -301,6 +311,7 @@ static int image_info(ulong addr)
 		break;
 	}
 
+	unmap_sysmem(hdr);
 	return 1;
 }
 

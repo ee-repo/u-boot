@@ -17,12 +17,12 @@
 #define CONFIG_SYS_LOAD_ADDR		(CONFIG_SYS_SDRAM_BASE + SZ_2M)
 #define CONFIG_SYS_MALLOC_LEN		SZ_16M
 
+#define CONFIG_SYS_BOOTM_LEN		SZ_64M
+
 /* For timer, QEMU emulates an ARMv7/ARMv8 architected timer */
 #define CONFIG_SYS_HZ                       1000
 
 /* Environment options */
-#define CONFIG_ENV_ADDR			0x4000000
-#define CONFIG_ENV_SIZE			SZ_256K
 
 #define BOOT_TARGET_DEVICES(func) \
 	func(USB, usb, 0) \

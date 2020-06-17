@@ -6,6 +6,7 @@
 	#address-cells = <1>;
 	#size-cells = <1>;
 	model = "sandbox";
+	compatible = "sandbox";
 
 	aliases {
 		i2c0 = &i2c_0;
@@ -23,6 +24,11 @@
 		reg = <0 0>;
 		u-boot,dm-pre-reloc;
 		compatible = "google,cros-ec-sandbox";
+	};
+
+	dsi_host: dsi_host {
+		compatible = "sandbox,dsi-host";
+		status = "okay";
 	};
 
 	ethrawbus {
@@ -63,7 +69,6 @@
 		compatible = "sandbox,spi";
 		cs-gpios = <0>, <&gpio_a 0>;
 	};
-
 };
 
 #include "sandbox.dtsi"

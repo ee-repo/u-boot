@@ -6,7 +6,9 @@
 
 #include <common.h>
 #include <clk-uclass.h>
+#include <clock_legacy.h>
 #include <dm.h>
+#include <vsprintf.h>
 #include <dm/lists.h>
 #include <dt-bindings/clk/mpc83xx-clk.h>
 #include <asm/arch/soc.h>
@@ -65,7 +67,10 @@ static inline bool is_clk_valid(struct udevice *clk, int id)
 	case MPC83XX_CLK_DMAC:
 		return (type == SOC_MPC8308) || (type == SOC_MPC8309);
 	case MPC83XX_CLK_PCI:
-		return mpc83xx_has_pci(type);
+		/*
+		 * FIXME: implement proper support for this.
+		 */
+		return 0 && mpc83xx_has_pci(type);
 	case MPC83XX_CLK_CSB:
 		return true;
 	case MPC83XX_CLK_I2C2:

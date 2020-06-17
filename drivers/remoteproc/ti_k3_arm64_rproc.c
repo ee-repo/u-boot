@@ -15,6 +15,8 @@
 #include <reset.h>
 #include <asm/io.h>
 #include <power-domain.h>
+#include <dm/device_compat.h>
+#include <linux/err.h>
 #include <linux/soc/ti/ti_sci_protocol.h>
 #include "ti_sci_proc.h"
 
@@ -225,4 +227,5 @@ U_BOOT_DRIVER(k3_arm64) = {
 	.ops = &k3_arm64_ops,
 	.probe = k3_arm64_probe,
 	.priv_auto_alloc_size = sizeof(struct k3_arm64_privdata),
+	.flags = DM_FLAG_DEFAULT_PD_CTRL_OFF,
 };

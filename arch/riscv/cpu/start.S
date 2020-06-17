@@ -174,7 +174,7 @@ spl_clear_bss:
 spl_clear_bss_loop:
 	SREG	zero, 0(t0)
 	addi	t0, t0, REGBYTES
-	bne	t0, t1, spl_clear_bss_loop
+	blt	t0, t1, spl_clear_bss_loop
 
 spl_stack_gd_setup:
 	jal	spl_relocate_stack_gd
@@ -197,6 +197,7 @@ spl_secondary_hart_stack_gd_setup:
 	la	a0, secondary_hart_relocate
 	mv	a1, s0
 	mv	a2, s0
+	mv	a3, zero
 	jal	smp_call_function
 
 	/* hang if relocation of secondary harts has failed */
@@ -216,7 +217,7 @@ spl_call_board_init_r:
 #endif
 
 /*
- * void relocate_code (addr_sp, gd, addr_moni)
+ * void relocate_code(addr_sp, gd, addr_moni)
  *
  * This "function" does not return, instead it continues in RAM
  * after relocating the monitor code.
@@ -324,7 +325,7 @@ clear_bss:
 clbss_l:
 	SREG	zero, 0(t0)		/* clear loop... */
 	addi	t0, t0, REGBYTES
-	bne	t0, t1, clbss_l
+	blt	t0, t1, clbss_l
 
 relocate_secondary_harts:
 #ifdef CONFIG_SMP
@@ -337,6 +338,7 @@ relocate_secondary_harts:
 
 	mv	a1, s2
 	mv	a2, s3
+	mv	a3, zero
 	jal	smp_call_function
 
 	/* hang if relocation of secondary harts has failed */
@@ -357,9 +359,8 @@ relocate_secondary_harts:
 call_board_init_r:
 	jal	invalidate_icache_all
 	jal	flush_dcache_all
-	la	t0, board_init_r
-	mv	t4, t0			/* offset of board_init_r() */
-	add	t4, t4, t6		/* real address of board_init_r() */
+	la	t0, board_init_r        /* offset of board_init_r() */
+	add	t4, t0, t6		/* real address of board_init_r() */
 /*
  * setup parameters for board_init_r
  */

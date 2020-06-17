@@ -294,7 +294,7 @@ int dm_gpio_request(struct gpio_desc *desc, const char *label)
 
 static int dm_gpio_requestf(struct gpio_desc *desc, const char *fmt, ...)
 {
-#if !defined(CONFIG_SPL_BUILD) || !defined(CONFIG_USE_TINY_PRINTF)
+#if !defined(CONFIG_SPL_BUILD) || !CONFIG_IS_ENABLED(USE_TINY_PRINTF)
 	va_list args;
 	char buf[40];
 
@@ -343,7 +343,7 @@ int gpio_request(unsigned gpio, const char *label)
  */
 int gpio_requestf(unsigned gpio, const char *fmt, ...)
 {
-#if !defined(CONFIG_SPL_BUILD) || !defined(CONFIG_USE_TINY_PRINTF)
+#if !defined(CONFIG_SPL_BUILD) || !CONFIG_IS_ENABLED(USE_TINY_PRINTF)
 	va_list args;
 	char buf[40];
 
@@ -364,8 +364,8 @@ int _dm_gpio_free(struct udevice *dev, uint offset)
 	uc_priv = dev_get_uclass_priv(dev);
 	if (!uc_priv->name[offset])
 		return -ENXIO;
-	if (gpio_get_ops(dev)->free) {
-		ret = gpio_get_ops(dev)->free(dev, offset);
+	if (gpio_get_ops(dev)->rfree) {
+		ret = gpio_get_ops(dev)->rfree(dev, offset);
 		if (ret)
 			return ret;
 	}
@@ -1043,8 +1043,8 @@ static int gpio_post_bind(struct udevice *dev)
 	if (!reloc_done) {
 		if (ops->request)
 			ops->request += gd->reloc_off;
-		if (ops->free)
-			ops->free += gd->reloc_off;
+		if (ops->rfree)
+			ops->rfree += gd->reloc_off;
 		if (ops->direction_input)
 			ops->direction_input += gd->reloc_off;
 		if (ops->direction_output)

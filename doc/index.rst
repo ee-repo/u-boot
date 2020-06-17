@@ -15,6 +15,17 @@ if you want to help out.
 .. toctree::
    :maxdepth: 2
 
+User-oriented documentation
+---------------------------
+
+The following manuals are written for *users* of the U-Boot - those who are
+trying to get it to work optimally on a given system.
+
+.. toctree::
+   :maxdepth: 2
+
+   build/index
+
 Unified Extensible Firmware (UEFI)
 ----------------------------------
 
@@ -74,6 +85,18 @@ organized in a vendor subdirectory.
    :maxdepth: 2
 
    board/index
+
+Android-specific doc
+--------------------
+
+These books provide information about booting the Android OS from U-Boot,
+manipulating Android images from U-Boot shell and discusses other
+Android-specific features available in U-Boot.
+
+.. toctree::
+   :maxdepth: 2
+
+   android/index
 
 Indices and tables
 ==================

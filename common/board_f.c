@@ -11,14 +11,18 @@
 
 #include <common.h>
 #include <bloblist.h>
+#include <clock_legacy.h>
 #include <console.h>
 #include <cpu.h>
+#include <cpu_func.h>
 #include <dm.h>
 #include <env.h>
 #include <env_internal.h>
 #include <fdtdec.h>
 #include <fs.h>
+#include <hang.h>
 #include <i2c.h>
+#include <init.h>
 #include <initcall.h>
 #include <lcd.h>
 #include <malloc.h>
@@ -26,6 +30,7 @@
 #include <os.h>
 #include <post.h>
 #include <relocate.h>
+#include <serial.h>
 #ifdef CONFIG_SPL
 #include <spl.h>
 #endif
@@ -588,6 +593,7 @@ static int reserve_stacks(void)
 static int reserve_bloblist(void)
 {
 #ifdef CONFIG_BLOBLIST
+	gd->start_addr_sp &= ~0xf;
 	gd->start_addr_sp -= CONFIG_BLOBLIST_SIZE;
 	gd->new_bloblist = map_sysmem(gd->start_addr_sp, CONFIG_BLOBLIST_SIZE);
 #endif
@@ -695,6 +701,7 @@ static int reloc_bootstage(void)
 		      gd->bootstage, gd->new_bootstage, size);
 		memcpy(gd->new_bootstage, gd->bootstage, size);
 		gd->bootstage = gd->new_bootstage;
+		bootstage_relocate();
 	}
 #endif
 
@@ -855,6 +862,16 @@ __weak int arch_cpu_init_dm(void)
 	return 0;
 }
 
+__weak int checkcpu(void)
+{
+	return 0;
+}
+
+__weak int clear_bss(void)
+{
+	return 0;
+}
+
 static const init_fnc_t init_sequence_f[] = {
 	setup_mon_len,
 #ifdef CONFIG_OF_CONTROL
@@ -897,9 +914,7 @@ static const init_fnc_t init_sequence_f[] = {
 	console_init_f,		/* stage 1 init of console */
 	display_options,	/* say that we are here */
 	display_text_info,	/* show debugging info if required */
-#if defined(CONFIG_PPC) || defined(CONFIG_SH) || defined(CONFIG_X86)
 	checkcpu,
-#endif
 #if defined(CONFIG_SYSRESET)
 	print_resetinfo,
 #endif
@@ -992,11 +1007,8 @@ static const init_fnc_t init_sequence_f[] = {
 #if defined(CONFIG_X86) || defined(CONFIG_ARC)
 	copy_uboot_to_ram,
 	do_elf_reloc_fixups,
-	clear_bss,
 #endif
-#if defined(CONFIG_XTENSA)
 	clear_bss,
-#endif
 #if !defined(CONFIG_ARM) && !defined(CONFIG_SANDBOX) && \
 		!CONFIG_IS_ENABLED(X86_64)
 	jump_to_copy,

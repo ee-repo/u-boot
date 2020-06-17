@@ -24,9 +24,6 @@ struct swap_case_platdata {
 	u32 bar[6];
 };
 
-#define offset_to_barnum(offset)	\
-		(((offset) - PCI_BASE_ADDRESS_0) / sizeof(u32))
-
 enum {
 	MEM_TEXT_SIZE	= 0x100,
 };
@@ -54,14 +51,7 @@ struct swap_case_priv {
 	char mem_text[MEM_TEXT_SIZE];
 };
 
-static int sandbox_swap_case_get_devfn(struct udevice *dev)
-{
-	struct pci_child_platdata *plat = dev_get_parent_platdata(dev);
-
-	return plat->devfn;
-}
-
-static int sandbox_swap_case_use_ea(struct udevice *dev)
+static int sandbox_swap_case_use_ea(const struct udevice *dev)
 {
 	return !!ofnode_get_property(dev->node, "use-ea", NULL);
 }
@@ -92,7 +82,7 @@ static const u32 ea_regs[] = {
 	PCI_CAP_EA_SIZE_HI,
 };
 
-static int sandbox_swap_case_read_ea(struct udevice *emul, uint offset,
+static int sandbox_swap_case_read_ea(const struct udevice *emul, uint offset,
 				     ulong *valuep, enum pci_size_t size)
 {
 	u32 reg;
@@ -105,8 +95,9 @@ static int sandbox_swap_case_read_ea(struct udevice *emul, uint offset,
 	return 0;
 }
 
-static int sandbox_swap_case_read_config(struct udevice *emul, uint offset,
-					 ulong *valuep, enum pci_size_t size)
+static int sandbox_swap_case_read_config(const struct udevice *emul,
+					 uint offset, ulong *valuep,
+					 enum pci_size_t size)
 {
 	struct swap_case_platdata *plat = dev_get_platdata(emul);
 
@@ -129,7 +120,7 @@ static int sandbox_swap_case_read_config(struct udevice *emul, uint offset,
 		*valuep = SANDBOX_PCI_VENDOR_ID;
 		break;
 	case PCI_DEVICE_ID:
-		*valuep = SANDBOX_PCI_DEVICE_ID;
+		*valuep = SANDBOX_PCI_SWAP_CASE_EMUL_ID;
 		break;
 	case PCI_CLASS_DEVICE:
 		if (size == PCI_SIZE_8) {
@@ -149,25 +140,13 @@ static int sandbox_swap_case_read_config(struct udevice *emul, uint offset,
 	case PCI_BASE_ADDRESS_4:
 	case PCI_BASE_ADDRESS_5: {
 		int barnum;
-		u32 *bar, result;
+		u32 *bar;
 
-		barnum = offset_to_barnum(offset);
+		barnum = pci_offset_to_barnum(offset);
 		bar = &plat->bar[barnum];
 
-		result = *bar;
-		if (*bar == 0xffffffff) {
-			if (barinfo[barnum].type) {
-				result = (~(barinfo[barnum].size - 1) &
-					PCI_BASE_ADDRESS_IO_MASK) |
-					PCI_BASE_ADDRESS_SPACE_IO;
-			} else {
-				result = (~(barinfo[barnum].size - 1) &
-					PCI_BASE_ADDRESS_MEM_MASK) |
-					PCI_BASE_ADDRESS_MEM_TYPE_32;
-			}
-		}
-		debug("r bar %d=%x\n", barnum, result);
-		*valuep = result;
+		*valuep = sandbox_pci_read_bar(*bar, barinfo[barnum].type,
+					       barinfo[barnum].size);
 		break;
 	}
 	case PCI_CAPABILITY_LIST:
@@ -231,7 +210,7 @@ static int sandbox_swap_case_write_config(struct udevice *emul, uint offset,
 		int barnum;
 		u32 *bar;
 
-		barnum = offset_to_barnum(offset);
+		barnum = pci_offset_to_barnum(offset);
 		bar = &plat->bar[barnum];
 
 		debug("w bar %d=%lx\n", barnum, value);
@@ -286,8 +265,8 @@ static void sandbox_swap_case_do_op(enum swap_case_op op, char *str, int len)
 	}
 }
 
-int sandbox_swap_case_read_io(struct udevice *dev, unsigned int addr,
-			      ulong *valuep, enum pci_size_t size)
+static int sandbox_swap_case_read_io(struct udevice *dev, unsigned int addr,
+				     ulong *valuep, enum pci_size_t size)
 {
 	struct swap_case_priv *priv = dev_get_priv(dev);
 	unsigned int offset;
@@ -304,8 +283,8 @@ int sandbox_swap_case_read_io(struct udevice *dev, unsigned int addr,
 	return 0;
 }
 
-int sandbox_swap_case_write_io(struct udevice *dev, unsigned int addr,
-			       ulong value, enum pci_size_t size)
+static int sandbox_swap_case_write_io(struct udevice *dev, unsigned int addr,
+				      ulong value, enum pci_size_t size)
 {
 	struct swap_case_priv *priv = dev_get_priv(dev);
 	unsigned int offset;
@@ -392,8 +371,7 @@ static int sandbox_swap_case_unmap_physmem(struct udevice *dev,
 	return 0;
 }
 
-struct dm_pci_emul_ops sandbox_swap_case_emul_ops = {
-	.get_devfn = sandbox_swap_case_get_devfn,
+static struct dm_pci_emul_ops sandbox_swap_case_emul_ops = {
 	.read_config = sandbox_swap_case_read_config,
 	.write_config = sandbox_swap_case_write_config,
 	.read_io = sandbox_swap_case_read_io,
@@ -417,7 +395,8 @@ U_BOOT_DRIVER(sandbox_swap_case_emul) = {
 };
 
 static struct pci_device_id sandbox_swap_case_supported[] = {
-	{ PCI_VDEVICE(SANDBOX, SANDBOX_PCI_DEVICE_ID), SWAP_CASE_DRV_DATA },
+	{ PCI_VDEVICE(SANDBOX, SANDBOX_PCI_SWAP_CASE_EMUL_ID),
+		SWAP_CASE_DRV_DATA },
 	{},
 };
 

@@ -5,10 +5,12 @@
  */
 
 #include <common.h>
+#include <init.h>
 #include <asm/arch/boot.h>
 #include <asm/arch/eth.h>
 #include <asm/arch/g12a.h>
 #include <asm/arch/mem.h>
+#include <asm/arch/meson-vpu.h>
 #include <asm/io.h>
 #include <asm/armv8/mmu.h>
 #include <linux/sizes.h>
@@ -57,6 +59,10 @@ void meson_init_reserved_memory(void *fdt)
 	/* Add BL32 reserved zone */
 	if (bl32_start && bl32_size)
 		meson_board_add_reserved_memory(fdt, bl32_start, bl32_size);
+
+#if defined(CONFIG_VIDEO_MESON)
+	meson_vpu_rsv_fb(fdt);
+#endif
 }
 
 phys_size_t get_effective_memsize(void)
