@@ -949,6 +949,7 @@ dtb-$(CONFIG_TARGET_DURIAN) += phytium-durian.dtb
 dtb-$(CONFIG_TARGET_PRESIDIO_ASIC) += ca-presidio-engboard.dtb
 
 dtb-y += businesscard.dtb
+dtb-y += businesscard-nand.dtb
 
 targets += $(dtb-y)
 
