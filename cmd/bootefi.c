@@ -13,6 +13,7 @@
 #include <efi_selftest.h>
 #include <env.h>
 #include <errno.h>
+#include <image.h>
 #include <malloc.h>
 #include <linux/libfdt.h>
 #include <linux/libfdt_env.h>
@@ -127,13 +128,13 @@ static efi_status_t copy_fdt(void **fdtp)
 	new_fdt_addr = (uintptr_t)map_sysmem(fdt_ram_start + 0x7f00000 +
 					     fdt_size, 0);
 	ret = efi_allocate_pages(EFI_ALLOCATE_MAX_ADDRESS,
-				 EFI_BOOT_SERVICES_DATA, fdt_pages,
+				 EFI_ACPI_RECLAIM_MEMORY, fdt_pages,
 				 &new_fdt_addr);
 	if (ret != EFI_SUCCESS) {
 		/* If we can't put it there, put it somewhere */
 		new_fdt_addr = (ulong)memalign(EFI_PAGE_SIZE, fdt_size);
 		ret = efi_allocate_pages(EFI_ALLOCATE_MAX_ADDRESS,
-					 EFI_BOOT_SERVICES_DATA, fdt_pages,
+					 EFI_ACPI_RECLAIM_MEMORY, fdt_pages,
 					 &new_fdt_addr);
 		if (ret != EFI_SUCCESS) {
 			printf("ERROR: Failed to reserve space for FDT\n");
@@ -151,14 +152,10 @@ done:
 
 static void efi_reserve_memory(u64 addr, u64 size)
 {
-	u64 pages;
-
 	/* Convert from sandbox address space. */
 	addr = (uintptr_t)map_sysmem(addr, 0);
-	pages = efi_size_in_pages(size + (addr & EFI_PAGE_MASK));
-	addr &= ~EFI_PAGE_MASK;
-	if (efi_add_memory_map(addr, pages, EFI_RESERVED_MEMORY_TYPE,
-			       false) != EFI_SUCCESS)
+	if (efi_add_memory_map(addr, size,
+			       EFI_RESERVED_MEMORY_TYPE) != EFI_SUCCESS)
 		printf("Reserved memory mapping failed addr %llx size %llx\n",
 		       addr, size);
 }
@@ -481,10 +478,8 @@ efi_status_t efi_run_image(void *source_buffer, efi_uintn_t source_size)
 	ret = do_bootefi_exec(handle);
 
 out:
-	if (mem_handle)
-		efi_delete_handle(mem_handle);
-	if (file_path)
-		efi_free_pool(file_path);
+	efi_delete_handle(mem_handle);
+	efi_free_pool(file_path);
 	return ret;
 }
 
@@ -600,7 +595,8 @@ static int do_efi_selftest(void)
  * @argv:	command line arguments
  * Return:	status code
  */
-static int do_bootefi(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+static int do_bootefi(struct cmd_tbl *cmdtp, int flag, int argc,
+		      char *const argv[])
 {
 	efi_status_t ret;
 	void *fdt;

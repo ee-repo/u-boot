@@ -8,6 +8,8 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+#include <linux/stringify.h>
+
 #include "mx6_common.h"
 
 #undef CONFIG_DISPLAY_BOARDINFO
@@ -68,10 +70,6 @@
 #define CONFIG_ENV_OVERWRITE
 
 /* Command definition */
-#undef CONFIG_CMD_LOADB
-#undef CONFIG_CMD_LOADS
-#undef CONFIG_CMD_NFS
-#undef CONFIG_CMD_FLASH
 
 #undef CONFIG_IPADDR
 #define CONFIG_IPADDR			192.168.10.2
@@ -134,8 +132,6 @@
 #define MEM_LAYOUT_ENV_SETTINGS \
 	"bootm_size=0x10000000\0" \
 	"fdt_addr_r=0x12100000\0" \
-	"fdt_high=0xffffffff\0" \
-	"initrd_high=0xffffffff\0" \
 	"kernel_addr_r=0x11000000\0" \
 	"pxefile_addr_r=0x17100000\0" \
 	"ramdisk_addr_r=0x12200000\0" \
@@ -191,10 +187,6 @@
 #undef CONFIG_SYS_MAXARGS
 #define CONFIG_SYS_MAXARGS		48
 
-#define CONFIG_SYS_MEMTEST_START	0x10000000
-#define CONFIG_SYS_MEMTEST_END		0x10010000
-#define CONFIG_SYS_MEMTEST_SCRATCH	0x10800000
-
 #define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
 
 /* Physical Memory Map */
@@ -216,7 +208,5 @@
 #define CONFIG_SYS_MMC_ENV_DEV		0
 #define CONFIG_SYS_MMC_ENV_PART		1
 #endif
-
-#define CONFIG_CMD_TIME
 
 #endif	/* __CONFIG_H */

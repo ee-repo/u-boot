@@ -17,9 +17,13 @@
 #include <cpu_func.h>
 #include <errno.h>
 #include <hwconfig.h>
+#include <log.h>
 #include <mmc.h>
 #include <part.h>
+#include <asm/cache.h>
 #include <dm/device_compat.h>
+#include <linux/bitops.h>
+#include <linux/delay.h>
 #include <linux/err.h>
 #include <power/regulator.h>
 #include <malloc.h>
@@ -787,7 +791,7 @@ static int esdhc_set_voltage(struct mmc *mmc)
 	switch (mmc->signal_voltage) {
 	case MMC_SIGNAL_VOLTAGE_330:
 		if (priv->vs18_enable)
-			return -EIO;
+			return -ENOTSUPP;
 #if CONFIG_IS_ENABLED(DM_REGULATOR)
 		if (!IS_ERR_OR_NULL(priv->vqmmc_dev)) {
 			ret = regulator_set_value(priv->vqmmc_dev, 3300000);
@@ -968,7 +972,8 @@ static int esdhc_set_ios_common(struct fsl_esdhc_priv *priv, struct mmc *mmc)
 	if (priv->signal_voltage != mmc->signal_voltage) {
 		ret = esdhc_set_voltage(mmc);
 		if (ret) {
-			printf("esdhc_set_voltage error %d\n", ret);
+			if (ret != -ENOTSUPP)
+				printf("esdhc_set_voltage error %d\n", ret);
 			return ret;
 		}
 	}
@@ -1451,6 +1456,7 @@ static int fsl_esdhc_probe(struct udevice *dev)
 	if (ret) {
 		dev_dbg(dev, "no vqmmc-supply\n");
 	} else {
+		priv->vqmmc_dev = vqmmc_dev;
 		ret = regulator_set_enable(vqmmc_dev, true);
 		if (ret) {
 			dev_err(dev, "fail to enable vqmmc-supply\n");
