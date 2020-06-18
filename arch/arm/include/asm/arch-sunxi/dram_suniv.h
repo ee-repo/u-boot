@@ -10,6 +10,10 @@
  * SPDX-License-Identifier:	GPL-2.0+
  */
 
+#ifndef __ASSEMBLY__
+#include <linux/bitops.h>
+#endif
+
 #define PIO_SDRAM_DRV			(0x2c0)
 #define PIO_SDRAM_PULL			(0x2c4)
 
