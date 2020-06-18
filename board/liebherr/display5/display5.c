@@ -13,6 +13,7 @@
 #include <asm/arch/mx6-pins.h>
 #include <asm/arch/mx6-ddr.h>
 #include <asm/arch/sys_proto.h>
+#include <env.h>
 #include <errno.h>
 #include <asm/gpio.h>
 #include <malloc.h>
@@ -25,7 +26,6 @@
 #include <miiphy.h>
 #include <netdev.h>
 #include <i2c.h>
-#include <environment.h>
 
 #include <dm.h>
 #include <dm/platform_data/serial_mxc.h>
@@ -413,12 +413,3 @@ int misc_init_r(void)
 
 	return 0;
 }
-
-static struct mxc_serial_platdata mxc_serial_plat = {
-	.reg = (struct mxc_uart *)UART5_BASE,
-};
-
-U_BOOT_DEVICE(mxc_serial) = {
-	.name = "serial_mxc",
-	.platdata = &mxc_serial_plat,
-};

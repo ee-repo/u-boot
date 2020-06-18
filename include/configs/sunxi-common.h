@@ -132,10 +132,6 @@
 #define CONFIG_SYS_MAX_NAND_DEVICE 8
 #endif
 
-#ifdef CONFIG_SPL_SPI_SUNXI
-#define CONFIG_SYS_SPI_U_BOOT_OFFS	0x8000
-#endif
-
 /* mmc config */
 #ifdef CONFIG_MMC
 #define CONFIG_MMC_SUNXI_SLOT		0
@@ -274,9 +270,6 @@ extern int soft_i2c_gpio_scl;
 #endif
 #endif /* ifdef CONFIG_REQUIRE_SERIAL_CONSOLE */
 
-/* GPIO */
-#define CONFIG_SUNXI_GPIO
-
 #ifdef CONFIG_VIDEO_SUNXI
 /*
  * The amount of RAM to keep free at the top of RAM when relocating u-boot,
@@ -303,10 +296,6 @@ extern int soft_i2c_gpio_scl;
 #ifdef CONFIG_USB_EHCI_HCD
 #define CONFIG_USB_OHCI_NEW
 #define CONFIG_SYS_USB_OHCI_MAX_ROOT_PORTS 1
-#endif
-
-#ifdef CONFIG_USB_KEYBOARD
-#define CONFIG_PREBOOT
 #endif
 
 #ifndef CONFIG_SPL_BUILD
