@@ -137,6 +137,9 @@
 #define CONFIG_MMC_SUNXI_SLOT		0
 #endif
 
+
+#define CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR 0x40
+
 #if defined(CONFIG_ENV_IS_IN_MMC)
 
 #ifdef CONFIG_ARM64
