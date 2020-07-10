@@ -1,8 +1,0 @@
-bash tools/gen_sunxi_spinand_img.sh u-boot-sunxi-with-spl.spinand.bin u-boot-sunxi-with-spl.bin 2048 128
-sudo sunxi-fel uboot u-boot-sunxi-with-spl.bin write 0x82000000 u-boot-sunxi-with-spl.spinand.bin
-
-in minicom uboot console:
-=> mtd erase spi-nand0
-=> mtd write spi-nand0 0x82000000 0 0x100000
-
-reboot
