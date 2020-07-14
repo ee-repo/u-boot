@@ -200,7 +200,16 @@ CONFIG_USB3_VBUS_PIN=""
 # CONFIG_R_I2C_ENABLE is not set
 # CONFIG_AXP_GPIO is not set
 CONFIG_VIDEO_SUNXI=y
-CONFIG_VIDEO_LCD_MODE="x:800,y:480,depth:18,pclk_khz:33000,le:87,ri:40,up:31,lo:13,hs:1,vs:1,sync:3,vmode:0"
+# 800 480 orig
+# CONFIG_VIDEO_LCD_MODE="x:800,y:480,depth:18,pclk_khz:33000,le:87,ri:40,up:31,lo:13,hs:1,vs:1,sync:3,vmode:0"
+# CONFIG_VIDEO_LCD_MODE="x:800,y:480,depth:18,pclk_khz:33000,le:87,ri:40,up:1,lo:43,hs:1,vs:1,sync:3,vmode:0"
+CONFIG_VIDEO_LCD_MODE="x:800,y:600,depth:18,pclk_khz:40000,le:88,ri:40,up:19,lo:5,hs:128,vs:4,sync:3,vmode:0"
+#CONFIG_VIDEO_LCD_MODE="x:800,y:480,depth:24,pclk_khz:33000,le:0,ri:0,up:0,lo:0,hs:128,vs:45,sync:3,vmode:0"
+#CONFIG_VIDEO_LCD_MODE="x:800,y:600,depth:24,pclk_khz:40000,le:199,ri:0,up:59,lo:0,hs:1,vs:1,sync:3,vmode:0"
+#CONFIG_VIDEO_LCD_MODE="x:800,y:600,depth:18,pclk_khz:40000,le:88,ri:40,up:55,lo:1,hs:72,vs:4,sync:3,vmode:0"
+#CONFIG_VIDEO_LCD_MODE="x:800,y:600,depth:18,pclk_khz:40000,le:45,ri:210,up:22,lo:12,hs:1,vs:1,sync:3,vmode:0"
+#CONFIG_VIDEO_LCD_MODE="x:800,y:600,depth:18,pclk_khz:40000,le:45,ri:154,up:22,lo:37,hs:1,vs:1,sync:3,vmode:0"
+
 CONFIG_VIDEO_LCD_DCLK_PHASE=1
 CONFIG_VIDEO_LCD_POWER=""
 CONFIG_VIDEO_LCD_RESET=""
@@ -282,7 +291,8 @@ CONFIG_BOOTSTAGE_STASH_SIZE=0x1000
 # CONFIG_SD_BOOT is not set
 # CONFIG_SPI_BOOT is not set
 CONFIG_BOOTDELAY=2
-# CONFIG_USE_BOOTARGS is not set
+CONFIG_USE_BOOTARGS=y
+CONFIG_BOOTARGS="console=ttyS0,115200 panic=5 rootwait root=/dev/mtdblock3 rw rootfstype=jffs2"
 CONFIG_USE_BOOTCOMMAND=y
 CONFIG_BOOTCOMMAND="run distro_bootcmd"
 

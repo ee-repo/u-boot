@@ -27,7 +27,7 @@
 #define CONFIG_SPL_LEGACY_IMAGE_SUPPORT 1
 #define CONFIG_MMC2_CD_PIN ""
 #define CONFIG_USE_TINY_PRINTF 1
-#define CONFIG_BOOTARGS "console=ttyS0,115200 panic=5 rootwait root=/dev/mtdblock3 rw rootfstype=jffs2"
+#define CONFIG_BOOTARGS "console=tty0 console=ttyS0,115200 panic=5 rootwait root=/dev/mtdblock3 rw rootfstype=jffs2"
 #define CONFIG_CMD_CONSOLE 1
 #define CONFIG_CMD_BOOTD 1
 #define CONFIG_SYS_NS16550 1
@@ -151,7 +151,6 @@
 #define CONFIG_CMDLINE 1
 #define CONFIG_DTOC 1
 #define CONFIG_SPL_LIBCOMMON_SUPPORT 1
-#define CONFIG_BOOTCOMMAND "run distro_bootcmd"
 #define CONFIG_CMD_RUN 1
 #define CONFIG_USB_KEYBOARD 1
 #define CONFIG_FS_FAT_MAX_CLUSTSIZE 65536
@@ -171,7 +170,6 @@
 #define CONFIG_SPL_SYS_MALLOC_F_LEN 0x400
 #define CONFIG_SYS_ARCH "arm"
 #define CONFIG_CMD_DM 1
-#define CONFIG_USE_BOOTCOMMAND 1
 #define CONFIG_EXPERT 1
 #define CONFIG_SYS_SOC "sunxi"
 #define CONFIG_MMC2_PINS ""

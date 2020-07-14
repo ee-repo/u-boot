@@ -170,6 +170,8 @@ const struct spi_flash_info spi_flash_ids[] = {
 	{"w25q32dw",	   INFO(0xef6016, 0x0,	64 * 1024,    64, RD_FULL | WR_QPP | SECT_4K) },
 	{"w25q64dw",	   INFO(0xef6017, 0x0,	64 * 1024,   128, RD_FULL | WR_QPP | SECT_4K) },
 	{"w25q128fw",	   INFO(0xef6018, 0x0,	64 * 1024,   256, RD_FULL | WR_QPP | SECT_4K) },
+  {"xt25f128b",    INFO(0x0b4018, 0x0,  64 * 1024,   256, RD_FULL | WR_QPP | SECT_4K) },
+
 #endif
 	{},	/* Empty entry to terminate the list */
 	/*
