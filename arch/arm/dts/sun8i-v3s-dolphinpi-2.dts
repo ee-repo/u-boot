@@ -41,7 +41,7 @@
  */
 
 /dts-v1/;
-#include "sun8i-v3s-licheepi-zero.dts"
+#include "sun8i-h2-plus-orangepi-zero.dts"
 
 / {
 	soc {

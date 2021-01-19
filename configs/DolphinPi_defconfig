@@ -1,13 +1,19 @@
 # ARCH
 CONFIG_ARM=y
 CONFIG_ARCH_SUNXI=y
-CONFIG_MACH_SUN8I_V3S=y
-CONFIG_DRAM_CLK=360
-CONFIG_DRAM_ZQ=14779
+CONFIG_MACH_SUN8I_H3=y
+CONFIG_DRAM_CLK=408
+CONFIG_DRAM_ZQ=3881979
 CONFIG_SUN8I_EMAC=y
 CONFIG_DM_ETH=y
 CONFIG_MII=y
 CONFIG_DM_MDIO_MUX=y
+# CONFIG_DRAM_ODT_EN is not set
+# CONFIG_VIDEO_DT_SIMPLEFB is not set
+# CONFIG_CLK_SUN8I_H3 is not set
+# CONFIG_CONSOLE_MUX is not set
+# # CONFIG_SYS_CONSOLE_IS_IN_ENV is not set
+CONFIG_SYS_TEXT_BASE=0x42e00000
 
 # DTS
 CONFIG_DEFAULT_DEVICE_TREE="sun8i-v3s-dolphinpi"
@@ -17,7 +23,7 @@ CONFIG_SPL=y
 
 # DEBUG
 CONFIG_LOGLEVEL=7
-CONFIG_CONS_INDEX=3
+CONFIG_CONS_INDEX=1
 
 # UBI
 CONFIG_MTD_UBI=y
@@ -43,7 +49,7 @@ CONFIG_ENV_UBI_VOLUME_REDUND="ubootenv2"
 # BOOT
 CONFIG_MTDIDS_DEFAULT="spi-nand0=0"
 CONFIG_MTDPARTS_DEFAULT="mtdparts=0:1M(boot),-(ubi0)"
-CONFIG_BOOTCOMMAND="ubifsmount ubi0:kernel; ubifsload $kernel_addr_r uImage; ubifsload $fdt_addr_r dtb; bootm 0x41000000 - 0x41800000"
+CONFIG_BOOTCOMMAND="ubifsmount ubi0:kernel; ubifsload $kernel_addr_r uImage; ubifsload $fdt_addr_r dtb; bootm $kernel_addr_r - $fdt_addr_r"
 CONFIG_USE_BOOTARGS=y
 CONFIG_BOOTARGS="console=ttyS0,115200 earlyprintk panic=5 rootwait ubi.mtd=1,2048 rootfstype=ubifs root=ubi0:rootfs rw"
 

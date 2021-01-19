@@ -10,6 +10,8 @@
 #include <mapmem.h>
 #include <linux/libfdt.h>
 
+#define DEBUG
+
 #ifdef CONFIG_SPL_OS_BOOT
 #error CONFIG_SPL_OS_BOOT is not supported yet
 #endif
@@ -158,7 +160,8 @@ struct sunxi_nand_config sunxi_known_nands[] = {
 	{
 		.name = "Winbond W25N01GVxxIG",
 		.jedec_id = 0x00EFAA21,
-		.page_mask = 0x0000FFFF,
+		.page_mask = 0x00FFFFFF,
+		//.page_mask = 0x0000FFFF,
 		.page_shift = 11,
 		.addr_mask = 0x7FF,
 		.addr_shift = 0,
@@ -367,7 +370,8 @@ static void sunxi_spi0_load_page(struct sunxi_nand_config * config, u32 addr, ul
 
 	do {
 		/* tCS = 100ns + tRD_ECC 70ns -> 200ns wait */
-		ndelay(200);
+		/* ndelay(200); */
+		udelay(2);
 
 		/* Poll */
 		writel(2 + 1, spi_bc_reg);   /* Burst counter (total bytes) */
@@ -458,7 +462,8 @@ static void sunxi_spi0_read_data(struct sunxi_nand_config * config, u8 *buf, u32
 		*buf++ = readb(spi_rx_reg);
 
 	/* tSHSL time is up to 100 ns in various SPI flash datasheets */
-	ndelay(100);
+	/* ndelay(100); */
+	udelay(2);
 }
 
 static void sunxi_spi0_read_cache(struct sunxi_nand_config * config, void *buf, u32 addr, u32 len) {
@@ -555,7 +560,8 @@ static u32 sunxi_spi0_read_id(ulong spi_ctl_reg,
 	idbuf[2] = readb(spi_rx_reg);
 
 	/* tSHSL time is up to 100 ns in various SPI flash datasheets */
-	ndelay(100);
+	/* ndelay(100); */
+  udelay(2);
 
 	return idbuf[2] | (idbuf[1] << 8) | (idbuf[0] << 16);
 }
