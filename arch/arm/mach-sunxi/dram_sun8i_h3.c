@@ -23,6 +23,7 @@ struct dram_para {
 	u8 dual_rank;
 	u8 row_bits;
 #ifdef CONFIG_SUNXI_H3_DRAM_DDR2
+#error 00
 	u8 bank_bits;
 #endif
 };
@@ -516,7 +517,7 @@ static void mctl_auto_detect_dram_size(struct dram_para *para)
 #endif
 			break;
 
-#ifndef CONFIG_SUNXI_H3_DRAM_DDR2
+#ifdef CONFIG_SUNXI_H3_DRAM_DDR2
 	/* detect bank address bits */
 	para->bank_bits = 3;
 	mctl_set_cr(para);
