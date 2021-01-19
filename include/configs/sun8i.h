@@ -30,4 +30,17 @@
  */
 #include <configs/sunxi-common.h>
 
+#undef CONFIG_BOOTCOMMAND
+#define CONFIG_BOOTCOMMAND   "sf probe 0 50000000; " \
+                      "sf read 0x80C00000 0x100000 0x4000; "  \
+                      "sf read 0x48000000 0x110000 0x400000; " \
+                      "bootz 0x48000000 - 0x80C00000"
+
+#define CONFIG_SYS_NAND_MAX_ECCPOS 1664
+#define CONFIG_SYS_NAND_ONFI_DETECTION
+#define CONFIG_SYS_MAX_NAND_DEVICE 8
+
+#define CONFIG_MTD_DEVICE
+#define CONFIG_MTD_PARTITIONS
+
 #endif /* __CONFIG_H */
