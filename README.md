@@ -5,3 +5,4 @@
 - h3-spi-devel-base-on-v3s-spi-experimental
 - f1c100s-devel-2020.04
 - f1c100s-v2020.07
+- f1c100s-v2019.04
