@@ -2142,6 +2142,7 @@ int drv_video_init(void)
 	if (cfg_video_init() == -1)
 		return 0;
 
+  // while(1);
 	if (board_cfb_skip())
 		return 0;
 

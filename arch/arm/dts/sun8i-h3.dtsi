@@ -158,6 +158,14 @@
 			#dma-cells = <1>;
 		};
 
+		spi0: spi@01c68000 {
+			compatible = "allwinner,sun8i-h3-spi";
+			reg = <0x01c68000 0x1000>;
+			status = "disabled";
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
 		mmc0: mmc@01c0f000 {
 			compatible = "allwinner,sun7i-a20-mmc",
 				     "allwinner,sun5i-a13-mmc";
